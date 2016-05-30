@@ -1,0 +1,37 @@
+extends layout
+
+block content
+	nav.navbar.navbar-default.navbar-fixed-bottom
+		div.container
+			div.embed-responsive(data-toggle='tooltip')
+				div#player
+
+	div.container.body
+		form(method='post', action='/playlist').add
+			div.row
+				div.col-lg-12
+					div.input-group
+						span.input-group-btn
+							button.btn.btn-default(type='submit') Add URL
+						input.form-control(type='url', name='url', placeholder='supports youtube, bandcamp, and tumblr audio', autofocus)
+
+		div.table-responsive
+			table#playlist.table.table-bordered.table-hover.table-condensed
+				thead
+					tr
+						th.row-id
+						th.row-title='TITLE'
+						th.row-artist='ARTIST'
+				tbody
+					each track in playlist
+						tr
+							td.hideChild
+								p#id=track._id
+							td(title=track.title)=track.title
+							td(title=track.artist)=track.artist
+
+	script(type='text/javascript').
+		var tag = document.createElement('script');
+		tag.src = "https://www.youtube.com/iframe_api";
+		var firstScriptTag = document.getElementsByTagName('script')[0];
+		firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);

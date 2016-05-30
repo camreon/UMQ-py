@@ -1,0 +1,57 @@
+#input {
+	width: 80%;
+	margin: 0 0 10px 0;
+}
+
+#playlist {
+    background-color: floralwhite;
+    table-layout: fixed;
+}
+
+#playlist tbody tr:hover {
+    cursor: pointer;
+}
+
+#playlist td {
+    overflow: hidden;
+}
+.row-id     { width: 35px;  }
+.row-title  { width: 70%; }
+.row-artist { width: 30%; }
+
+.container.body {
+    padding-top: 15px;
+    padding-bottom: 50px;
+}
+
+body {
+    background-color: lightgray;
+}
+
+.navbar {
+    height: 50px;
+}
+.embed-responsive {
+    position: initial;
+    height: 100%;
+}
+
+audio {
+    width: 100%;
+}
+
+form.add {
+    margin-bottom: 15px;
+}
+
+.hidden {
+    display: none;
+}
+
+.hideChild > * {
+    display: none;
+}
+
+#playlist tr {
+    height: 31px;
+}
