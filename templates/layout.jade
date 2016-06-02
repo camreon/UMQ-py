@@ -1,7 +1,7 @@
 doctype html
 html
   head
-    title= title
+    title='UMQ'
     meta(name='viewport', content='width=device-width, initial-scale=1')
     link(rel='shortcut icon' href="{{ url_for('static', filename='favicon.ico') }}")
     link(rel='stylesheet', href="{{ url_for('static', filename='css/lib/bootstrap.min.css') }}")
@@ -13,7 +13,5 @@ html
     script(src="//code.jquery.com/jquery-1.11.3.min.js")
     script(src="//code.jquery.com/jquery-migrate-1.2.1.min.js")
     script(src="{{ url_for('static', filename='js/lib/bootstrap.min.js') }}")
-    script(src="{{ url_for('static', filename='js/source.js') }}")
-    script(src="{{ url_for('static', filename='js/youtube.js') }}")
-    script(src="{{ url_for('static', filename='js/HTML5.js') }}")
+    script(src="{{ url_for('static', filename='js/player.js') }}")
     script(src="{{ url_for('static', filename='js/umq.js') }}")

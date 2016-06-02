@@ -14,6 +14,7 @@
 
 #playlist td {
     overflow: hidden;
+    white-space: nowrap;
 }
 .row-id     { width: 35px;  }
 .row-title  { width: 70%; }
@@ -54,4 +55,50 @@ form.add {
 
 #playlist tr {
     height: 31px;
+}
+
+#delete, #info {
+    -webkit-transition: color 0.2s false;
+    -webkit-transition-delay: ease-in;
+    -moz-transition: color 0.2s false ease-in;
+    -o-transition: color 0.2s false ease-in;
+    transition: color 0.15s ease-in;
+    font-size: 16px;
+    padding: 4px 10px;
+}
+
+#message {
+    position: fixed;
+    margin: -10px auto;
+    left: 50px;
+    right: 50px;
+}
+
+#message .alert {
+    -webkit-box-shadow: 0 5px 15px rgba(0,0,0,.5);
+    box-shadow: 0 5px 15px rgba(0,0,0,.5);
+}
+
+.alert > p {
+    overflow-wrap: break-word;
+}
+
+.close {
+    opacity: 0.5;
+}
+
+.alert-dismissible .close {
+    color: black;
+}
+
+.close:hover {
+    opacity: 0.7;
+}
+
+#delete a {
+    color: rgba(185, 3, 3, 0.63);
+}
+
+#delete a:hover {
+    color: rgb(150, 3, 3);
 }

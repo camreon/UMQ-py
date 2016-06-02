@@ -1,7 +1,11 @@
-from flask import Flask, g, request, render_template, jsonify, abort
+from __future__ import unicode_literals
+from flask import Flask, g, render_template, jsonify, abort, flash, \
+    redirect, url_for, request
 from flask.ext.pymongo import PyMongo
+import youtube_dl
 
 app = Flask('__name__')
+app.secret_key = 'some_secret'
 app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
 app.config['MONGO_DBNAME'] = 'umq'
 app.debug = True
@@ -16,7 +20,7 @@ def before_request():
 
 @app.route('/')
 def index():
-    return render_template('index.jade', playlist=g.playlist.find())
+    return render_template('index.jade', playlist=g.playlist.find().sort('_id', 1))
 
 
 @app.route('/playlist/<ObjectId:id>')
@@ -25,17 +29,36 @@ def get_track_url(id):
     return track['url']
 
 
-@app.route('/delete/<id>')
+@app.route('/delete/<ObjectId:id>')
 def delete_track(id):
-    raise InvalidUsage('This view is unimplemented', status_code=404)
+    track = g.playlist.find_one_and_delete({'_id': id})
+    flash('DELETED: %s - %s' % (track['title'], track['artist']))
+    return redirect(url_for('index'))
 
 
-# @app.route('/playlist', methods=['POST'])
-# def add():
-    #
-    # return redirect(url_for('index'))
+@app.route('/playlist', methods=['POST'])
+def add():
+    url = request.form['url']
+    with youtube_dl.YoutubeDL() as ydl:
+        info = ydl.extract_info(url, download=False)
+
+    if 'entries' in info:
+        tracks = info['entries']
+    else:
+        tracks = [info]
+
+    for t in tracks:
+        g.playlist.insert_one({
+            'title': t['title'],
+            'artist': t.get('artist', ''),
+            'url': t['url']
+        })
+        flash('ADDED: %s' % t['title'])
+
+    return redirect(url_for('index'))
 
 
+# error handling #
 class InvalidUsage(Exception):
     status_code = 400
 
@@ -64,6 +87,11 @@ def custom400(error):
     # response = jsonify({'message': error.description})
     print(error.description)
     abort(400, error.description)
+
+
+# @app.errorhandler(404)
+# def custom404(error):
+#     return render_template('404.jade', error=error)
 
 
 # Run application
