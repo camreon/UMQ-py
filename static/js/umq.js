@@ -4,24 +4,29 @@ $(function() {
         Load(CurrentTrack());
     });
 
-    // close alerts w/ ESC key
-    $(document).keyup(function (event) {
-        if (event.which === 27) {
+    $(document).keyup(function (e) {
+        if (e.which === 27) // esc
             $('#message').empty();
-        }
+        if (e.which === 0 || e.which === 32) // space
+            player.PauseOrResume();
+    }).on('keyup', '#deleteModal', function(e) {
+        if (e.which === 13) // enter
+            $('#confirmDelete').submit();
     });
 
     $('#deleteModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget) ;
         var trackID = button.data('trackid');
         var title = button.data('title');
-        var modal = $(this);
-        modal.find('.modal-title').text('Delete ' + title + '?');
-        modal.find('.modal-body #confirmDelete').attr('href', '/delete/' + trackID);
+        if (title === undefined) title = 'all tracks';
+        if (trackID === undefined) trackID = '';
+
+        $(this).find('.modal-title').text('Are you sure you want to delete ' + title + '?');
+        $(this).find('.modal-body #confirmDelete').attr('action', '/delete/'+trackID);
     })
 });
 
-var nowPlaying; // number of the track that's currently playing
+var nowPlaying; // index of the current track
 var playlistLength = $("#playlist tr").length;
 var player = new Player();
 

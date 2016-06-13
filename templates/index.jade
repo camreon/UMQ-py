@@ -2,58 +2,58 @@ extends layout
 
 block content
     nav.navbar.navbar-default.navbar-fixed-bottom
-        div.container
-            div.embed-responsive(data-toggle='tooltip')
-                div#player
+        div.container#player
+            audio(controls)
 
     div.container.body
         form(method='post', action='/playlist').add
-            div.row
-                div.col-lg-12
-                    div.input-group
-                        span.input-group-btn
-                            button.btn.btn-default(type='submit') Add URL
-                        input.form-control(required, type='url', name='url', placeholder='supports most audio/video streaming sites', autofocus)
+            div.input-group
+                span.input-group-btn
+                    button.btn.btn-default(type='submit') Add URL
+                input.form-control(required, type='url', name='url', placeholder='supports most audio/video streaming sites', autofocus)
+                span.input-group-btn
+                    button.btn.btn-default.dropdown-toggle(type='button', data-toggle="dropdown", aria-label='Supported Sites', aria-haspopup="true", aria-expanded="false")
+                        span.caret
+                    ul.dropdown-menu.dropdown-menu-right
+                        li
+                            a(href='https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md', target='_blank', title='Supported Sites') Supported Sites
+                        li
+                            a(role='button', title='Delete All', data-toggle='modal', data-target='#deleteModal') Delete All
 
-        div#message
-            - var messages = get_flashed_messages()
+        div#message.container
+            - var messages = get_flashed_messages(with_categories=true)
             if messages
-                div.flashes.alert.alert-info.alert-dismissible(role='alert')
-                    button.close(type='button', data-dismiss='alert', aria-label='Close')
-                        span(aria-hidden='true')='x'
-                    each message in messages
+                each category, message in messages
+                    if category == 'message'
+                        category = 'info'
+                    div.flashes.fade.in.alert.alert-dismissible(class='alert-'+category, role='alert')
+                        button.close(type='button', data-dismiss='alert', aria-label='Close')
+                            span(aria-hidden='true')='x'
                         p=message
 
         div.table-responsive
             table#playlist.table.table-bordered.table-hover.table-condensed
                 thead
                     tr
-                        th.row-id#info
-                            a(href='https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md', target='_blank', role='button', title='Supported Sites')
-                                span.glyphicon.glyphicon-info-sign(aria-hidden='true')
+                        th.row-id
                         th.row-title='TITLE'
-                        th.row-artist='ARTIST'
+                        th.row-artist='SRC'
                 tbody
                     each track in playlist
                         tr
                             td#delete
                                 a#id(role='button', title='Delete', data-toggle='modal', data-target='#deleteModal', data-trackid=track._id, data-title=track.title)
                                     span.glyphicon.glyphicon-remove(aria-hidden='true')
-                            td#title(title=track.title)=track.title
-                            td#artist(title=track.artist)=track.artist
+                            td#title(title=track.title)=track.title + track.artist
+                            td#url(title=track.page_url)=track.page_url
 
         div.modal.fade#deleteModal(tabindex='-1', role='dialog', aria-labelledby='confirmationTitle')
-            div.modal-dialog(role='document')
+            div.modal-dialog.modal-sm(role='document')
                 div.modal-content
                     div.modal-header
                         button.close(type='button', data-dismiss='modal', aria-label="Close")
                             span(aria-hidden='true')='x'
                         h4.modal-title#confirmationTitle='Are you sure you want to delete this?'
                     div.modal-body
-                        a.btn.btn-danger#confirmDelete(href='/delete/', type='button')='Confirm'
-
-    script(type='text/javascript').
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+                        form#confirmDelete(action='/', role='form')
+                            button.btn.btn-danger(type='button')='Confirm'

@@ -4,14 +4,13 @@ html
     title='UMQ'
     meta(name='viewport', content='width=device-width, initial-scale=1')
     link(rel='shortcut icon' href="{{ url_for('static', filename='favicon.ico') }}")
-    link(rel='stylesheet', href="{{ url_for('static', filename='css/lib/bootstrap.min.css') }}")
+    link(rel='stylesheet', href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}")
     link(rel='stylesheet', href="{{ url_for('static', filename='css/index.css') }}")
 
   body
     block content
 
-    script(src="//code.jquery.com/jquery-1.11.3.min.js")
-    script(src="//code.jquery.com/jquery-migrate-1.2.1.min.js")
-    script(src="{{ url_for('static', filename='js/lib/bootstrap.min.js') }}")
+    script(src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}")
+    script(src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}")
     script(src="{{ url_for('static', filename='js/player.js') }}")
     script(src="{{ url_for('static', filename='js/umq.js') }}")

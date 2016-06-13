@@ -1,0 +1,19 @@
+{
+  "name": "umq-py",
+  "homepage": "https://github.com/camreon/UMQ-py",
+  "description": "",
+  "main": "",
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.0.0",
+    "bootstrap": "^3.3.6"
+  }
+}

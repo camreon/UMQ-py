@@ -2,36 +2,30 @@
 function Player() {
 
     var audio;
-    var nextTrackID;
-
-    this.Load = function(url) {
-        self = this;
-        if ($('audio').length === 0) {
-            audio = $(document.createElement('audio'));
-            audio.bind('error', function(e) {
-                self.Error(e);
-            });
-            audio.bind('ended', function() {
-                Load(NextTrack());
-            });
-            $('#player').prepend(audio);
-        }
-
-        audio = $('audio')[0];
-        audio.setAttribute("controls", "");
-        audio.src = url;
-        audio.play();
-    };
 
     this.Play = function(id) {
-        var self = this;
-        $.get('playlist/' + id)
-            .done(function(url) {
-                self.Load(url);
-            })
-            .fail(function() {
-                console.error('url for track #'+id+' not found');
+        self = this;
+        audio = $('audio')[0];
+
+        if (audio.src === '') {
+            $('audio').bind('error', function(e) {
+                self.Error(e);
             });
+            $('audio').bind('ended', function() {
+                Load(NextTrack());
+            });
+        }
+        audio.setAttribute('controls', '');
+        audio.setAttribute('autoplay', '');
+        audio.src = 'playlist/'+id;
+    }
+
+    this.PauseOrResume = function() {
+        if (audio === undefined) return;
+        if (audio.paused)
+            audio.play();
+        else
+            audio.pause();
     }
 
     this.Stop = function() {
@@ -47,7 +41,7 @@ function Player() {
                 .append($("<button class='close' type='button' data-dismiss='alert' aria-label='Close'></button>")
                     .append($("<span aria-hidden='true'>x</span>"))
                 )
-                .append($("<p>Error playing: " + e.target.src + "</p>"))
+                .append($('<p>Error playing: '+e.target.src+'</p>'))
             )
     }
 }
