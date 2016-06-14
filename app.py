@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 import logging
 import random
 import subprocess
-import sys
+import os
 
 from logging.handlers import RotatingFileHandler
 from flask import (Flask, Response, abort, flash, g, jsonify, redirect,
@@ -14,7 +14,7 @@ import youtube_dl
 
 
 app = Flask('__name__')
-app.secret_key = '4_sessions'  # TODO: move to app.config
+app.secret_key = os.environ.get('SECRET_KEY', 'set by env var')
 app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
 app.config['MONGO_DBNAME'] = 'umq'
 app.debug = True
@@ -35,7 +35,9 @@ def index():
     if tracks.count() == 0:
         flash('Looks like you haven\'t added any tracks yet. Try this one:')
         flash(get_example())
-    return render_template('index.jade', playlist=tracks)
+
+    added = request.args.get('added_track_id', None)
+    return render_template('index.jade', playlist=tracks, added_track_id=added)
 
 
 @app.route('/playlist/<ObjectId:id>')
@@ -53,6 +55,7 @@ def stream_track(id):
             for line in proc.stdout:
                 yield line
         except (OSError, Exception, BaseException) as e:
+            app.logger.error(type(e))
             app.logger.error(e)
         else:
             app.logger.info('Finished streaming')
@@ -60,10 +63,7 @@ def stream_track(id):
 
     return Response(stream_with_context(ydl_stream(track['page_url'])),
                     mimetype='audio/mp4',
-                    # status=206,  # status_code?
-                    headers={'Accept-Ranges': 'bytes',
-                             # 'Content-Type': 'audio/mp4',
-                             'Content-Range': 'bytes '})
+                    headers={'Accept-Ranges': 'bytes'})
 
 
 @app.route('/playlist', methods=['POST'])
@@ -79,14 +79,14 @@ def add():
         tracks = [info]
 
     for t in tracks:
-        g.playlist.insert_one({
+        res = g.playlist.insert_one({
             'title': t['title'],
             'artist': t.get('artist', ''),
             'page_url': url,
             'url': t.get('url', url)
         })
         flash('ADDED: %s' % t['title'])
-    return redirect(url_for('index'))
+    return redirect(url_for('index', added_track_id=res.inserted_id))
 
 
 @app.route('/delete/')
@@ -128,27 +128,21 @@ def handle_invalid_usage(error):
 
 @app.errorhandler(400)
 def custom400(error):
-    # response = jsonify({'message': error.description})
-    print(error.description)
+    app.logger.error(error.description)
     abort(400, error.description)
 
 
-# @app.errorhandler(404)
-# def custom404(error):
-#     return render_template('404.jade', error=error)
-
 def get_example():
-    ex_urls = [
+    return random.choice([
         'https://gloccamorradied.bandcamp.com/track/professional-confessional-2',
         'https://www.youtube.com/watch?v=CvCLhq8okxc',
         'https://soundcloud.com/serf-crook/homemovie02',
         'http://babydreamgirl.tumblr.com/post/137912267129/this-is-the-version-\f-beautiful-i-was-talking'
-    ]
-    return random.choice(ex_urls)
+    ])
 
 # Run application
 if __name__ == '__main__':
     handler = RotatingFileHandler('umq.log', maxBytes=10000, backupCount=1)
     handler.setLevel(logging.DEBUG)
     app.logger.addHandler(handler)
-    app.run(debug=True, port=3000, threaded=True)
+    app.run(debug=True, port=5000, threaded=True)
