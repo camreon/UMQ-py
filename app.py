@@ -16,7 +16,8 @@ import youtube_dl
 app = Flask('__name__')
 app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
 app.secret_key = os.environ.get('SECRET_KEY', 'set by env var')
-app.config['MONGO_DBNAME'] = os.environ.get('MONGO_DBNAME', 'umq')
+# app.config['MONGO_DBNAME'] = os.environ.get('MONGO_DBNAME', 'umq')
+app.config['MONGO_URI'] = os.environ.get('MONGODB_URI', 'mongodb://localhost/umq')
 app.debug = True
 
 mongo = PyMongo(app)
