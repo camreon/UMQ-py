@@ -1,6 +1,6 @@
 {
   "name": "umq-py",
-  "homepage": "https://github.com/camreon/UMQ-py",
+  "homepage": "https://github.com/camreon/UMQ",
   "description": "",
   "main": "",
   "license": "MIT",
@@ -14,6 +14,7 @@
   ],
   "dependencies": {
     "jquery": "^2.2.4",
-    "bootstrap": "^3.3.6"
+    "bootstrap": "^3.3.6",
+    "backbone": "^1.3.3"
   }
 }

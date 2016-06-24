@@ -6,7 +6,7 @@ import logging
 
 logger = logging.getLogger('ydl')
 logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.FileHandler('ydl.log'))
+logger.addHandler(logging.FileHandler('logs/ydl.log'))
 
 parser = argparse.ArgumentParser(description='stream audio via youtube-dl')
 parser.add_argument(dest='url')

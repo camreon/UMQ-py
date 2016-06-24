@@ -22,7 +22,9 @@ Runs at [http://localhost:5000](http://localhost:5000)
 
 ## Deployment
 
-
+```
+$ git push
+```
 
 ## TODO
 

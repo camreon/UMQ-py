@@ -3,22 +3,19 @@ extends layout
 block content
     nav.navbar.navbar-default.navbar-fixed-bottom
         div.container#player
-            audio(controls)
+            audio(controls, autoplay)
 
-    div.container.body
-        form(method='post', action='/playlist').add
-            div.input-group
-                span.input-group-btn
-                    button.btn.btn-default(type='submit') Add URL
-                input.form-control(required, type='url', name='url', placeholder='supports most audio/video streaming sites', autofocus)
-                span.input-group-btn
-                    button.btn.btn-default.dropdown-toggle(type='button', data-toggle="dropdown", aria-label='Supported Sites', aria-haspopup="true", aria-expanded="false")
-                        span.caret
-                    ul.dropdown-menu.dropdown-menu-right
-                        li
-                            a(href='https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md', target='_blank', title='Supported Sites') Supported Sites
-                        li
-                            a(role='button', title='Delete All', data-toggle='modal', data-target='#deleteModal') Delete All
+    div.container.body#playlistApp
+        div.input-group
+            span.input-group-btn
+                button#addBtn.btn.btn-default(type='submit') Add URL
+            input#add.form-control(required, type='url', name='url', placeholder='supports most audio/video streaming sites', autofocus)
+            span.input-group-btn
+                button.btn.btn-default.dropdown-toggle(type='button', data-toggle="dropdown", aria-label='Supported Sites', aria-haspopup="true", aria-expanded="false")
+                    span.caret
+                ul.dropdown-menu.dropdown-menu-right
+                    li: a(href='https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md', target='_blank', title='Supported Sites') Supported Sites
+                    li: a#deleteAll(role='button', title='Delete All') Delete All
 
         div#message.container
             - var messages = get_flashed_messages(with_categories=true)
@@ -32,28 +29,9 @@ block content
                         p=message
 
         div.table-responsive
-            table#playlist.table.table-bordered.table-hover.table-condensed
-                thead
-                    tr
-                        th.row-id
-                        th.row-title='TITLE'
-                        th.row-artist='SRC'
-                tbody
-                    each track in playlist
-                        tr
-                            td#delete
-                                a#id(role='button', title='Delete', data-toggle='modal', data-target='#deleteModal', data-trackid=track._id, data-title=track.title)
-                                    span.glyphicon.glyphicon-remove(aria-hidden='true')
-                            td#title(title=track.title)=track.title + track.artist
-                            td#url(title=track.page_url)=track.page_url
-
-        div.modal.fade#deleteModal(tabindex='-1', role='dialog', aria-labelledby='confirmationTitle')
-            div.modal-dialog.modal-sm(role='document')
-                div.modal-content
-                    div.modal-header
-                        button.close(type='button', data-dismiss='modal', aria-label="Close")
-                            span(aria-hidden='true')='x'
-                        h4.modal-title#confirmationTitle='Are you sure you want to delete this?'
-                    div.modal-body
-                        form#confirmDelete(action='/', role='form')
-                            button.btn.btn-danger(type='submit')='Confirm'
+            table.table.table-hover
+                thead: tr
+                    th.row-source='SOURCE'
+                    th.row-track='TRACK'
+                    th.row-delete
+                tbody#playlist

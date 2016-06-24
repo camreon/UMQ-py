@@ -66,4 +66,5 @@ target/
 #bower
 .bower-cache/
 .bower-registry/
-static/bower_components
+static/bower_components/
+logs/

@@ -6,16 +6,17 @@ import subprocess
 import os
 
 from logging.handlers import RotatingFileHandler
-from flask import (Flask, Response, abort, flash, g, jsonify, redirect,
-                   render_template, request, stream_with_context, url_for)
+from flask import (Flask, Response, abort, flash, g, json, jsonify,
+                   render_template, request, stream_with_context)
 from flask.ext.pymongo import PyMongo
+from bson import json_util
 
 import youtube_dl
 
 
 app = Flask('__name__')
 app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
-app.secret_key = os.environ.get('SECRET_KEY', 'set by env var')
+app.secret_key = os.environ.get('SECRET_KEY', 'set in .env')
 app.config['MONGO_URI'] = os.environ.get('MONGODB_URI', 'mongodb://localhost/umq')
 app.debug = True
 
@@ -24,20 +25,50 @@ mongo = PyMongo(app)
 
 @app.before_request
 def before_request():
-    '''Connect to DB before every request.'''
     g.playlist = mongo.db.playlist
 
 
 @app.route('/')
 def index():
     '''Render tracklist.'''
-    tracks = g.playlist.find().sort('_id', 1)
-    if tracks.count() == 0:
+    added = request.args.get('added', None)
+    return render_template('index.jade', added=added)
+
+
+@app.route('/playlist', methods=['GET'])
+def get_all_tracks():
+    tracks = list(g.playlist.find().sort('_id', 1))
+    app.logger.debug('%s track(s) found.' % len(tracks))
+    if len(tracks) == 0:
         flash('Looks like you haven\'t added any tracks yet. Try this one:')
         flash(get_example())
+    return json.dumps(tracks, default=json_util.default)
 
-    added = request.args.get('added_track_id', None)
-    return render_template('index.jade', playlist=tracks, added_track_id=added)
+
+@app.route('/playlist', methods=['POST'])
+def add():
+    '''Get track info from a URL and add it to the playlist.'''
+    data = request.get_json()
+    url = data['url']
+    try:
+        with youtube_dl.YoutubeDL() as ydl:
+            info = ydl.extract_info(url, download=False)
+    except:
+        # TODO handle unsupported URLs
+        info = {'url': url, 'title': 'n/a'}  # offline dummy data
+
+    tracks = info['entries'] if 'entries' in info else [info]
+
+    for t in tracks:
+        g.playlist.insert_one({
+            'title': t['title'],
+            'artist': t.get('artist', ''),
+            'page_url': url,
+            'url': t.get('url', url),
+            # TODO 'duration': t.get('duration') ???
+        })
+        app.logger.info('ADDED: %s' % t['title'])
+    return jsonify(title=t['title'], url=url)
 
 
 @app.route('/playlist/<ObjectId:id>')
@@ -55,7 +86,6 @@ def stream_track(id):
             for line in proc.stdout:
                 yield line
         except (OSError, Exception, BaseException) as e:
-            app.logger.error(type(e))
             app.logger.error(e)
         else:
             app.logger.info('Finished streaming')
@@ -66,40 +96,22 @@ def stream_track(id):
                     headers={'Accept-Ranges': 'bytes'})
 
 
-@app.route('/playlist', methods=['POST'])
-def add():
-    '''Get track info from a URL and add it to the playlist.'''
-    url = request.form['url']
-    with youtube_dl.YoutubeDL() as ydl:
-        info = ydl.extract_info(url, download=False)
-
-    if 'entries' in info:
-        tracks = info['entries']
-    else:
-        tracks = [info]
-
-    for t in tracks:
-        res = g.playlist.insert_one({
-            'title': t['title'],
-            'artist': t.get('artist', ''),
-            'page_url': url,
-            'url': t.get('url', url)
-        })
-        flash('ADDED: %s' % t['title'])
-    return redirect(url_for('index', added_track_id=res.inserted_id))
-
-
-@app.route('/delete/')
-@app.route('/delete/<ObjectId:id>')
+@app.route('/playlist/<ObjectId:id>', methods=['DELETE'])
 def delete(id=None):
-    '''Delete a track by ID or delete all tracks.'''
-    if id is None:
-        result = g.playlist.delete_many({})
-        flash('DELETED: %s tracks' % result.deleted_count)
-    else:
-        track = g.playlist.find_one_and_delete({'_id': id})
-        flash('DELETED: %s - %s' % (track['title'], track['url']))
-    return redirect(url_for('index'))
+    '''Delete a track by ID.'''
+    res = g.playlist.find_one_and_delete({'_id': id})
+    app.logger.info('DELETED: %s - %s' % (res['title'], res['url']))
+    return json.dumps(res, default=json_util.default)
+
+
+# TODO
+@app.route('/playlist/<ObjectId:id>', methods=['PUT'])
+def update(id):
+    track = request.get_json()
+    app.logger.debug(track)
+    res = g.playlist.update_one({'_id': track['id']}, track)
+    app.logger.debug(res)
+    return res
 
 
 # error handling #
@@ -128,6 +140,7 @@ def handle_invalid_usage(error):
 
 @app.errorhandler(400)
 def custom400(error):
+    app.logger.error(error)
     app.logger.error(error.description)
     abort(400, error.description)
 
@@ -142,7 +155,7 @@ def get_example():
 
 # Run application
 if __name__ == '__main__':
-    handler = RotatingFileHandler('umq.log', maxBytes=10000, backupCount=1)
+    handler = RotatingFileHandler('logs/umq.log', maxBytes=10000, backupCount=1)
     handler.setLevel(logging.DEBUG)
     app.logger.addHandler(handler)
     app.run(debug=True, port=5000, threaded=True)
