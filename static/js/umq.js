@@ -37,7 +37,8 @@ $(function() {
         template: _.template($('#track-template').html()),
         events: {
             'click .delete': 'clear',
-            'click': 'playTrack'
+            'click .url': 'playTrack',
+            'click .track': 'playTrack'
         },
         initialize: function() {
             this.listenTo(this.model, 'change', this.render);
@@ -112,6 +113,7 @@ $(function() {
             if (!this.input.val()) return;
             Tracks.create({url: this.input.val()});
             this.input.val('');
+            $("html, body").animate({ scrollTop: $(document).height() }, 2000);
         },
         clearAll: function() {
             _.invoke(Tracks.models, 'destroy');
