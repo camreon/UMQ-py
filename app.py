@@ -16,10 +16,11 @@ import youtube_dl
 
 app = Flask('__name__')
 app.jinja_env.add_extension('pyjade.ext.jinja.PyJadeExtension')
-app.secret_key = os.environ.get('SECRET_KEY', 'set in .env')
-app.config['MONGO_URI'] = os.environ.get('MONGODB_URI', 'mongodb://localhost/umq')
-app.debug = True
-
+app.config.update(
+    DEBUG=os.environ.get('DEBUG', True),
+    SECRET_KEY=os.environ.get('SECRET_KEY', 'set in .env'),
+    MONGO_URI=os.environ.get('MONGODB_URI', 'mongodb://localhost/umq')
+)
 mongo = PyMongo(app)
 
 
@@ -155,7 +156,14 @@ def get_example():
 
 # Run application
 if __name__ == '__main__':
-    handler = RotatingFileHandler('logs/umq.log', maxBytes=10000, backupCount=1)
-    handler.setLevel(logging.DEBUG)
-    app.logger.addHandler(handler)
-    app.run(debug=True, port=5000, threaded=True)
+    if app.debug:
+        handler = RotatingFileHandler('logs/umq.log', maxBytes=10000, backupCount=1)
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+        handler.setFormatter(formatter)
+        app.logger.addHandler(handler)
+    else:
+        handler = logging.StreamHandler()
+        app.logger.addHandler(handler)
+        app.logger.info('stream logger startup')
+
+    app.run(debug=app.debug, port=5000, threaded=True)

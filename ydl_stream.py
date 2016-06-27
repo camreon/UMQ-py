@@ -4,9 +4,10 @@ import argparse
 import youtube_dl
 import logging
 
+handler = logging.StreamHandler()
 logger = logging.getLogger('ydl')
-logger.setLevel(logging.DEBUG)
-logger.addHandler(logging.FileHandler('logs/ydl.log'))
+logger.addHandler(handler)
+logger.info('YDL stream startup')
 
 parser = argparse.ArgumentParser(description='stream audio via youtube-dl')
 parser.add_argument(dest='url')
