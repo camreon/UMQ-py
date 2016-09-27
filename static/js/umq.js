@@ -52,6 +52,7 @@ $(function() {
             this.model.destroy();
         },
         playTrack: function () {
+            // TODO listen to when Player plays a track
             $('#playlist tr').removeClass('playing');
             this.$el.toggleClass('playing');
             Player.play(this.model);
