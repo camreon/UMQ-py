@@ -4,6 +4,7 @@ import logging
 import random
 import subprocess
 import os
+import sys
 
 from logging.handlers import RotatingFileHandler
 from flask import (Flask, Response, abort, flash, g, json, jsonify,
@@ -86,8 +87,13 @@ def stream_track(id):
                                     bufsize=0)
             for line in proc.stdout:
                 yield line
-        except (OSError, Exception, BaseException) as e:
-            app.logger.error(e)
+        except:
+            # TODO get the stderr from subprocess.STDOUT
+
+            # app.logger.error(e)
+            app.logger.error(proc.stderr)
+            app.logger.error(proc.stdout)
+            # app.logger.error(stderr.readline())
         else:
             app.logger.info('Finished streaming')
             proc.kill()
@@ -113,6 +119,27 @@ def update(id):
     res = g.playlist.update_one({'_id': track['id']}, track)
     app.logger.debug(res)
     return res
+
+
+@app.route('/playlist/export')
+def export():
+    def my_hook(d):
+        if d['status'] == 'finished':
+            print('Done downloading, now converting ...')
+
+    tracks = list(g.playlist.find().sort('_id', 1))
+    for t in tracks:
+        url = t['page_url']
+        ydl_opts = {
+            'format': 'mp4/bestaudio/best',
+            'outtmpl': 'downloads/{0}.%(ext)s'.format(t['title']),
+            'progress_hooks': [my_hook],
+            'verbose': True
+        }
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+            app.logger.debug(url)
+            ydl.download([url])
+
 
 
 # error handling #
