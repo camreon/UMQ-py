@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+{% block content %}
+<nav class="navbar navbar-default navbar-fixed-bottom">
+  <div class="container" id="player">
+    <audio controls autoplay></audio>
+  </div>
+</nav>
+<div class="container body" id="playlistApp">
+  <div class="input-group ">
+    <span class="input-group-btn"><button class="btn btn-default" id="addBtn" type="submit">Add URL</button></span>
+    <input class="form-control" id="add" required type="url" name="url"
+           placeholder="supports most audio/video streaming sites" autofocus/>
+    <span class="input-group-btn">
+      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"
+              aria-label="Supported Sites" aria-haspopup="true" aria-expanded="false"><span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li><a href="https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md" target="_blank"
+             title="Supported Sites">Supported Sites</a></li>
+        <li><a id="deleteAll" role="button" title="Delete All">Delete All</a></li>
+      </ul>
+    </span>
+  </div>
+  <div class="container" id="message">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          {% if category == 'message' %}
+            {% set category = 'info' %}
+          {% endif %}
+          <div class="flashes fade in alert alert-dismissible alert-{{ category }}" role="alert">
+            <button class="close" type="button" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">x</span>
+            </button>
+            <p>{{ message }}</p>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover">
+      <thead>
+      <tr>
+        <th class="row-source">SOURCE</th>
+        <th class="row-track">TRACK</th>
+        <th class="row-delete"></th>
+      </tr>
+      </thead>
+      <tbody id="playlist"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
