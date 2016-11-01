@@ -1,10 +1,10 @@
 $(function() {
 
     var Track = Backbone.Model.extend({
-        parse: function(attrs) {
-            attrs.id = (attrs._id === undefined) ? null : attrs._id.$oid;
-            return attrs;
-        },
+//        parse: function(attrs) {
+//            attrs.id = (attrs._id === undefined) ? null : attrs.id;
+//            return attrs;
+//        },
         defaults: function() {
             return {
                 title: null,
@@ -21,7 +21,7 @@ $(function() {
         url: '/playlist',
         modelId: function(attrs) {
             // null id for new models b/c mongodb will create it
-            return (attrs._id === undefined) ? null : attrs._id.$oid;
+            return attrs.id;
         },
         nextOrder: function() {
           if (!this.length) return 1;
