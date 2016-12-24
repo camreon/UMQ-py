@@ -5,11 +5,11 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "8080:80"
-    volumes:
-      - .:/app
+      - "5000:80"
     depends_on:
-     - postgres
+      - postgres
+    volumes:
+      - .:/web
   postgres:
     image: library/postgres
     environment:

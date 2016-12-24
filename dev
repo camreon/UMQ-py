@@ -4,4 +4,4 @@ Cyan=$'\e[1;36m'
 Green=$'\e[1;32m'
 
 trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
-python app.py | sed -e "s/^/[${Cyan}py${ColorOff}] /" & HOST_ADDR="$(ipconfig getifaddr en0)" docker-compose up
+sed -e "s/^/[${Cyan}py${ColorOff}] /" & HOST_ADDR="$(ipconfig getifaddr en0)" docker-compose up

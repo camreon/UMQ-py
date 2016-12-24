@@ -1,5 +1,4 @@
-FROM p0bailey/docker-flask
-ADD . /UMQ
-WORKDIR /UMQ
+FROM python:3.5
+
 RUN pip install -r requirements.txt
-CMD python runserver.py
+CMD web: python app.py
