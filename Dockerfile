@@ -1,4 +1,6 @@
-FROM python:3.5
+FROM tiangolo/uwsgi-nginx-flask:flask-python3.5
 
-RUN pip install -r requirements.txt
-CMD web: python app.py
+COPY requirements.txt /tmp/
+RUN pip install -U pip
+RUN pip install -r /tmp/requirements.txt
+RUN pip install youtube-dl --upgrade

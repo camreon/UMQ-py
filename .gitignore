@@ -67,4 +67,7 @@ target/
 .bower-cache/
 .bower-registry/
 static/bower_components/
+app/static/bower_components/
 logs/
+
+.DS_Store
