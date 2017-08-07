@@ -72,4 +72,4 @@ logs/
 
 .DS_Store
 
-umq/static/node_modules
+node_modules
