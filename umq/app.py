@@ -1,17 +1,22 @@
 from __future__ import unicode_literals
 import logging
-from logging.handlers import RotatingFileHandler
 import random
 import subprocess
 import youtube_dl
-from flask import (Flask, flash, json, jsonify, request, Response,
-                   render_template, stream_with_context)
-from flask_sqlalchemy import SQLAlchemy
-from config import DevelopmentConfig
 
-app = Flask('__name__')
+from flask import (
+    Flask, flash, json, jsonify, request, Response, render_template, stream_with_context
+)
+from flask_sqlalchemy import SQLAlchemy
+from umq.config import DevelopmentConfig
+
+app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
+
 db = SQLAlchemy(app)
+
+log_handler = logging.StreamHandler()
+app.logger.addHandler(log_handler)
 
 
 class Track(db.Model):
@@ -126,12 +131,12 @@ def delete(id=None):
 
 
 # TODO
-# @app.route('/<id>', methods=['PUT'])
+# @umq.route('/<id>', methods=['PUT'])
 # def update(id):
 #     track = request.get_json()
-#     app.logger.debug(track)
+#     umq.logger.debug(track)
 #     res = g.playlist.update_one({'_id': track['id']}, track)
-#     app.logger.debug(res)
+#     umq.logger.debug(res)
 #     return res
 
 def addTrack(track):
@@ -166,17 +171,3 @@ def get_example():
         'https://soundcloud.com/serf-crook/homemovie02',
         'http://babydreamgirl.tumblr.com/post/137912267129/this-is-the-version-\f-beautiful-i-was-talking'
     ])
-
-
-if __name__ == '__main__':
-    if app.debug:
-        handler = logging.StreamHandler()
-        app.logger.addHandler(handler)
-        app.logger.info('stream logger started')
-    else:
-        handler = RotatingFileHandler('logs/umq.log', maxBytes=10000, backupCount=1)
-        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-        handler.setFormatter(formatter)
-        app.logger.addHandler(handler)
-
-    app.run(debug=app.debug, host='0.0.0.0', port=80)

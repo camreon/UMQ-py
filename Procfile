@@ -1,1 +1,1 @@
-web: uwsgi app/uwsgi.ini
+web: gunicorn umq.app:app

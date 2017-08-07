@@ -3,17 +3,17 @@
 <head><title>UMQ</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='node_modules/bootstrap/dist/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
 </head>
 <body>
+
     {% block content %}{% endblock %}
 
-    <script src="{{ url_for('static', filename='bower_components/jquery/dist/jquery.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='bower_components/underscore/underscore.js') }}"></script>
-    <script src="{{ url_for('static', filename='bower_components/backbone/backbone.js') }}"></script>
+    <script src="{{ url_for('static', filename='node_modules/jquery/dist/jquery.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='node_modules/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='node_modules/underscore/underscore.js') }}"></script>
+    <script src="{{ url_for('static', filename='node_modules/backbone/backbone.js') }}"></script>
     <script src="{{ url_for('static', filename='js/backbone-collection-iterator.js') }}"></script>
     <script src="{{ url_for('static', filename='js/umq.js') }}"></script>
 
@@ -26,5 +26,6 @@
                                                                  aria-hidden="true"></span></a>
         </td>
     </script>
+
 </body>
 </html>

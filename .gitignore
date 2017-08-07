@@ -71,3 +71,5 @@ app/static/bower_components/
 logs/
 
 .DS_Store
+
+umq/static/node_modules

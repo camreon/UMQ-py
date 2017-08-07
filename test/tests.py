@@ -1,4 +1,4 @@
-from app import app
+from umq import app
 import unittest
 
 
@@ -38,7 +38,7 @@ class UmqTestCase(unittest.TestCase):
 
     def test_get_tracks(self):
         pass
-    #     res = self.app.get_tracks()
+    #     res = self.umq.get_tracks()
     #     print(res.data)
     #     assert b'professional confessional' in res.data
 
