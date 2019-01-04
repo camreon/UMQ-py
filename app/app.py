@@ -8,7 +8,7 @@ from flask import (
     Flask, flash, json, jsonify, request, Response, render_template, stream_with_context
 )
 from flask_sqlalchemy import SQLAlchemy
-from umq.config import DevelopmentConfig
+from config import DevelopmentConfig
 
 app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
@@ -23,13 +23,13 @@ class Track(db.Model):
     __tablename__ = 'tracks'
 
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String())
+    stream_url = db.Column(db.String())
     title = db.Column(db.String())
     artist = db.Column(db.String())
     page_url = db.Column(db.String())
 
-    def __init__(self, url, title, artist, page_url):
-        self.url = url
+    def __init__(self, stream_url, title, artist, page_url):
+        self.stream_url = stream_url
         self.title = title
         self.artist = artist
         self.page_url = page_url
@@ -40,7 +40,7 @@ class Track(db.Model):
     def to_json(self):
         return dict(
             id=self.id,
-            url=self.url,
+            stream_url=self.stream_url,
             title=self.title,
             artist=self.artist,
             page_url=self.page_url
@@ -113,7 +113,7 @@ def add():
             title=t['title'],
             artist=t.get('artist', ''),
             page_url=url,
-            url=t.get('url', url)
+            stream_url=t.get('url', url)
             # TODO 'duration'=t.get('duration') somehow ???
         )
         new_id = addTrack(new_track)

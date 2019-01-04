@@ -2,28 +2,27 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
-from umq.config import DevelopmentConfig
+from config import DevelopmentConfig
+from app import app, db
 
-app = Flask(__name__)
 app.config.from_object(DevelopmentConfig)
 
-
-db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 manager = Manager(app)
+
 manager.add_command('db', MigrateCommand)
 
 class Track(db.Model):
     __tablename__ = 'tracks'
 
     id = db.Column(db.Integer, primary_key=True)
-    url = db.Column(db.String())
+    stream_url = db.Column(db.String())
     title = db.Column(db.String())
     artist = db.Column(db.String())
     page_url = db.Column(db.String())
 
-    def __init__(self, url, title, artist, page_url):
-        self.url = url
+    def __init__(self, stream_url, title, artist, page_url):
+        self.stream_url = stream_url
         self.title = title
         self.artist = artist
         self.page_url = page_url
@@ -34,7 +33,7 @@ class Track(db.Model):
     def to_json(self):
         return dict(
             id=self.id,
-            url=self.url,
+            stream_url=self.stream_url,
             title=self.title,
             artist=self.artist,
             page_url=self.page_url

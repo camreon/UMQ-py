@@ -1,4 +1,4 @@
-from umq import app
+from app import app
 import unittest
 
 

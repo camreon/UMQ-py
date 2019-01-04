@@ -22,9 +22,12 @@ Runs at [http://localhost:5000](http://localhost:5000)
 
 uses sqlalchemy, alembic, and flask-migrate
 
-create psql db called `umq`
-
-
+```
+psql -U postgres -d umq
+```
+```
+CREATE DATABASE umq
+```
 ```
 python manage.py db init
 ```
