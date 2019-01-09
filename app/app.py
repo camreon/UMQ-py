@@ -57,6 +57,7 @@ def index():
 def ydl_stream(url):
     try:
         app.logger.info('Started streaming %s' % url)
+
         proc = subprocess.Popen(['python', 'ydl_stream.py', url],
                                 stdout=subprocess.PIPE,
                                 bufsize=0)
@@ -73,9 +74,11 @@ def ydl_stream(url):
 def stream_track(id):
     '''Get track URL based on ID and use youtube-dl to stream it.'''
     track = getTrack(id)
-    return Response(stream_with_context(ydl_stream(track.page_url)),
-                    mimetype='audio/mp4',
-                    headers={'Accept-Ranges': 'bytes'})
+    return Response(
+        stream_with_context(ydl_stream(track.page_url)),
+        mimetype='audio/mp4',
+        headers={'Accept-Ranges': 'bytes'}
+    )
 
 
 @app.route('/playlist/info/<id>')
@@ -87,11 +90,15 @@ def get_track_info(id):
 @app.route('/playlist', methods=['GET'])
 def get_all_tracks():
     tracks = Track.query.all()
+
     app.logger.debug('%s track(s) found.' % len(tracks))
+
     if len(tracks) == 0:
         flash('Looks like you haven\'t added any tracks yet. Try this one:')
         flash(get_example())
+
     json_tracks = [t.to_json() for t in tracks]
+
     return json.dumps(json_tracks)
 
 
@@ -100,6 +107,7 @@ def add():
     '''Get track info from a URL and add it to the playlist.'''
     data = request.get_json()
     url = data['url']
+
     try:
         with youtube_dl.YoutubeDL() as ydl:
             info = ydl.extract_info(url, download=False)
@@ -108,6 +116,7 @@ def add():
         info = {'url': url, 'title': 'n/a'}  # offline dummy data
 
     tracks = info['entries'] if 'entries' in info else [info]
+
     for t in tracks:
         new_track = Track(
             title=t['title'],
@@ -118,6 +127,7 @@ def add():
         )
         new_id = addTrack(new_track)
         app.logger.info('ADDED: %s (%s)' % (t['title'], new_id))
+
     return jsonify(title=t['title'], url=url)
 
 
@@ -127,6 +137,7 @@ def delete(id=None):
     track = Track.query.get(id)
     deleteTrack(track)
     app.logger.info('DELETED: %s - %s' % (track.title, track.url))
+
     return json.dumps(track)
 
 

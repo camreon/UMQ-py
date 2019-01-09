@@ -9,7 +9,9 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./umq:/umq
+      - ./app:/app
+    environment:
+      FLASK_DEBUG: 1
   postgres:
     image: library/postgres:9.6
     environment:
