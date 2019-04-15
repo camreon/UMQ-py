@@ -26,5 +26,6 @@ def upgrade():
         sa.Column('page_url', sa.String()),
     )
 
+
 def downgrade():
     op.drop_table('tracks')

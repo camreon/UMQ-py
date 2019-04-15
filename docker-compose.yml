@@ -9,7 +9,7 @@ services:
     depends_on:
       - postgres
     volumes:
-      - ./app:/app
+      - ./umq:/app/umq
     environment:
       FLASK_DEBUG: 1
   postgres:

@@ -7,44 +7,22 @@ import youtube_dl
 from flask import (
     Flask, flash, json, jsonify, request, Response, render_template, stream_with_context
 )
-from flask_sqlalchemy import SQLAlchemy
-from config import DevelopmentConfig
+from umq.config import get_env_config
+from umq.models import db, Track, getTrack, addTrack, deleteTrack
 
 app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)
 
-db = SQLAlchemy(app)
+env = get_env_config()
+
+app.config['SQLALCHEMY_DATABASE_URI'] = env['sqlalchemy_database_uri']
+app.config['SECRET_KEY'] = env['secret_key']
+app.config['ECOSYSTEM'] = env['ecosystem']
+app.config['DEBUG'] = env['debug']
+
+db.init_app(app)
 
 log_handler = logging.StreamHandler()
 app.logger.addHandler(log_handler)
-
-
-class Track(db.Model):
-    __tablename__ = 'tracks'
-
-    id = db.Column(db.Integer, primary_key=True)
-    stream_url = db.Column(db.String())
-    title = db.Column(db.String())
-    artist = db.Column(db.String())
-    page_url = db.Column(db.String())
-
-    def __init__(self, stream_url, title, artist, page_url):
-        self.stream_url = stream_url
-        self.title = title
-        self.artist = artist
-        self.page_url = page_url
-
-    def __repr__(self):
-        return '{}'.format(self.id)
-
-    def to_json(self):
-        return dict(
-            id=self.id,
-            stream_url=self.stream_url,
-            title=self.title,
-            artist=self.artist,
-            page_url=self.page_url
-        )
 
 
 @app.route('/')
@@ -58,7 +36,7 @@ def ydl_stream(url):
     try:
         app.logger.info('Started streaming %s' % url)
 
-        proc = subprocess.Popen(['python', 'ydl_stream.py', url],
+        proc = subprocess.Popen(['python', 'umq/ydl_stream.py', url],
                                 stdout=subprocess.PIPE,
                                 bufsize=0)
         for line in proc.stdout:
@@ -149,30 +127,6 @@ def delete(id=None):
 #     res = g.playlist.update_one({'_id': track['id']}, track)
 #     umq.logger.debug(res)
 #     return res
-
-def addTrack(track):
-    try:
-        db.session.add(track)
-        db.session.commit()
-        return track.id
-    except:
-        app.logger.error("Error adding track to DB.")
-
-
-def deleteTrack(track):
-    try:
-        db.session.delete(track)
-        db.session.commit()
-    except:
-        app.logger.error("Error deleting track from DB.")
-
-
-def getTrack(id):
-    return Track.query.filter_by(id=id).first_or_404()
-
-
-def get_all():
-    return Track.query.all()
 
 
 def get_example():

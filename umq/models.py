@@ -1,4 +1,7 @@
-import db
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
+
+db = SQLAlchemy()
 
 
 class Track(db.Model):
@@ -27,3 +30,25 @@ class Track(db.Model):
             artist=self.artist,
             page_url=self.page_url
         )
+
+
+def addTrack(track):
+    try:
+        db.session.add(track)
+        db.session.commit()
+        return track.id
+    except SQLAlchemyError as e:
+        app.logger.error("Error adding track -- %s" % str(e))
+
+
+def deleteTrack(track):
+    try:
+        db.session.delete(track)
+        db.session.commit()
+    except SQLAlchemyError as e:
+        app.logger.error("Error deleting track -- %s" % str(e))
+
+
+def getTrack(id):
+    return Track.query.filter_by(id=id).first_or_404()
+

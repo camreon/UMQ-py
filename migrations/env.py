@@ -1,8 +1,8 @@
 from __future__ import with_statement
-import os
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
+from environs import Env
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,9 +24,26 @@ target_metadata = None
 # ... etc.
 
 
+CONNECTION_STRING_FORMAT = 'postgresql+psycopg2://%s:%s@%s:%s/%s'
+
+env = Env()
+env.read_env()
+
+
 def get_url():
-    # return config.get_main_option("sqlalchemy.url")
-    return os.getenv("DATABASE_URL", "postgresql://postgres:umq@postgres:5432/umq")
+    user = env.str('DB_USER')
+    password = env.str('DB_PASSWORD')
+    host = env.str('DB_HOST')
+    port = env.str('DB_PORT')
+    name = env.str('DB_NAME')
+
+    return CONNECTION_STRING_FORMAT % (
+        user,
+        password,
+        host,
+        port,
+        name
+    )
 
 
 def run_migrations_offline():
@@ -71,6 +88,7 @@ def run_migrations_online():
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()
