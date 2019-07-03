@@ -5,13 +5,12 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8080:8080"
     depends_on:
       - postgres
     volumes:
       - ./umq:/app/umq
-    environment:
-      FLASK_DEBUG: 1
+    env_file: .env
   postgres:
     image: library/postgres:9.6
     environment:

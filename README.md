@@ -5,38 +5,16 @@
 #### Local Setup
 
 ```
-$ pip install -r requirements.txt
-$ brew install yarn
-$ yarn
-$ gem install foreman
+$ docker-compose build
+$ ./dev
 ```
 
-```
-$ foreman start (or python app.py)
-```
-
-Runs at [http://localhost:5000](http://localhost:5000)
+Runs at [http://localhost:8080](http://localhost:8080)
 
 
-## Migrations
+#### Prod Setup
 
-uses sqlalchemy, alembic, and flask-migrate
-
-```
-psql -U postgres -d umq
-```
-```
-CREATE DATABASE umq
-```
-```
-python manage.py db init
-```
-```
-python manage.py db migrate
-```
-```
-python manage.py db upgrade
-```
+heroku 
 
 ## TODO
 

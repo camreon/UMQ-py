@@ -1,5 +1,23 @@
+import logging
+from environs import Env, EnvError
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
+
+logger = logging.getLogger('db')
+logger.addHandler(logging.StreamHandler())
+
+
+# def get_db():
+#     env = Env()
+#     env.read_env()
+#
+#     testing = env.bool('TESTING', False)
+#
+#     if testing:
+#         return testing
+#     else:
+#         return SQLAlchemy()
 
 db = SQLAlchemy()
 
@@ -38,7 +56,7 @@ def addTrack(track):
         db.session.commit()
         return track.id
     except SQLAlchemyError as e:
-        app.logger.error("Error adding track -- %s" % str(e))
+        logging.error("Error adding track -- %s" % str(e))
 
 
 def deleteTrack(track):
@@ -46,9 +64,12 @@ def deleteTrack(track):
         db.session.delete(track)
         db.session.commit()
     except SQLAlchemyError as e:
-        app.logger.error("Error deleting track -- %s" % str(e))
+        logging.error("Error deleting track -- %s" % str(e))
 
 
 def getTrack(id):
     return Track.query.filter_by(id=id).first_or_404()
 
+
+def getAllTracks():
+    return Track.query.all();
