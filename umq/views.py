@@ -1,12 +1,13 @@
 import random
 import subprocess
-import youtube_dl
 
 from flask import (
-    abort, Blueprint, flash, json, jsonify, request, Response, render_template, stream_with_context
+    Blueprint, flash, json, jsonify, request, Response, render_template, stream_with_context
 )
 from umq.db import getAllTracks, getTrack, addTrack, deleteTrack, Track
 from umq.log import log
+from umq.stream_service import StreamService
+
 
 bp = Blueprint("index", __name__)
 
@@ -18,12 +19,14 @@ def index():
     return render_template('index.html', added=added)
 
 
+# TODO: move to StreamService
 def ydl_stream(url):
     try:
         log.info('Started streaming %s' % url)
 
         proc = subprocess.Popen(['python', 'umq/ydl_stream.py', url],
                                 stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
                                 bufsize=0)
         for line in proc.stdout:
             yield line
@@ -63,7 +66,7 @@ def get_all_tracks():
 
     json_tracks = [t.to_json() for t in tracks]
 
-    return json.dumps(json_tracks)
+    return jsonify(json_tracks)
 
 
 @bp.route('/playlist', methods=['POST'])
@@ -72,13 +75,7 @@ def add():
     data = request.get_json()
     url = data['url']
 
-    try:
-        with youtube_dl.YoutubeDL() as ydl:
-            info = ydl.extract_info(url, download=False)
-    except Exception as e:
-        # TODO handle unsupported URLs
-        info = {'url': url, 'title': 'n/a'}  # offline dummy data
-        abort(400)
+    info = StreamService().extract_info(url)
 
     tracks = info['entries'] if 'entries' in info else [info]
 
