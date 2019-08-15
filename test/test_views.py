@@ -44,6 +44,23 @@ class ViewsTest(TestCase):
         db.session.remove()
         db.drop_all()
 
+    def add_track(self, url):
+
+        with mock.patch(
+                'umq.stream_service.StreamService.extract_info',
+                return_value={'title': 'mock title', 'url': url}
+        ):
+            data = json.dumps(dict(page_url=url))
+            res = self.client.post('/playlist', data=data, content_type='application/json')
+
+            self.assert200(res)
+            self.assertIsNotNone(res.json)
+
+            added_track = res.json[0]
+            self.assertEqual(added_track['page_url'], url)
+
+            return added_track['id']
+
     def test_get_track_from_db_session(self):
 
         track = Track(
@@ -85,16 +102,11 @@ class ViewsTest(TestCase):
             'https://jebediahspringfield.bandcamp.com/track/i-like-killing-flies-2'
         ]
 
-        with mock.patch(
-            'umq.stream_service.StreamService.extract_info',
-            return_value=self.mock_extract_info
-        ):
-            for url in urls:
-                data = json.dumps(dict(url=url))
-                res = self.client.post('/playlist', data=data, content_type='application/json')
+        for url in urls:
+            self.add_track(url)
 
-                self.assert200(res)
-                self.assertEqual(res.json['url'], url)
+    def test_add_playlist(self):
+        pass
 
     def test_add_invalid_tracks(self):
 
@@ -109,7 +121,7 @@ class ViewsTest(TestCase):
             side_effect=BadRequest()
         ):
             for url in invalid_urls:
-                data = json.dumps(dict(url=url))
+                data = json.dumps(dict(page_url=url))
                 res = self.client.post('/playlist', data=data, content_type='application/json')
 
                 self.assert400(res)
@@ -117,23 +129,58 @@ class ViewsTest(TestCase):
 
     def test_get_tracks(self):
 
-        # add track
-        url = 'https://www.youtube.com/watch?v=c5OS0nALlfQ'
+        # add tracks
+        urls = [
+            'https://www.youtube.com/watch?v=c5OS0nALlfQ',
+            'http://justcuzurafraidurpeerswillfindou.tumblr.com/post/138394745892/babydreamgirl-babydreamgirl-this-is-the',
+            'https://jebediahspringfield.bandcamp.com/track/i-like-killing-flies-2'
+        ]
+        for url in urls:
+            self.add_track(url)
 
-        with mock.patch(
-                'umq.stream_service.StreamService.extract_info',
-                return_value={'title': 'mock title', 'url': url}
-        ):
-            data = json.dumps(dict(url=url))
-            res = self.client.post('/playlist', data=data, content_type='application/json')
-
-            self.assert200(res)
-
-        # confirm it's there
+        # confirm they're there
         res = self.client.get('/playlist')
 
         self.assertIsNotNone(res.json)
-        self.assertEqual(res.json[0]['page_url'], url)
+
+        for index, url in enumerate(urls):
+            self.assertEqual(
+                res.json[index]['page_url'],
+                url
+            )
+
+    def test_get_track_info(self):
+
+        # add track
+        url = 'https://www.youtube.com/watch?v=c5OS0nALlfQ'
+        track_id = self.add_track(url)
+
+        # confirm it's there
+        res = self.client.get('/playlist/info/{}'.format(track_id))
+
+        self.assertIsNotNone(res.json)
+        self.assertEqual(res.json['page_url'], url)
 
     def test_delete_track(self):
-        pass
+
+        # add track
+        url = 'https://www.youtube.com/watch?v=c5OS0nALlfQ'
+        track_id = self.add_track(url)
+
+        # confirm it's there
+        res = self.client.get('/playlist/info/{}'.format(track_id))
+
+        self.assertIsNotNone(res.json)
+        self.assertEqual(res.json['page_url'], url)
+
+        # delete it
+        res = self.client.delete('/playlist/{}'.format(track_id))
+
+        self.assert200(res)
+        self.assertEqual(res.json['page_url'], url)
+
+        # confirm it was deleted
+        res = self.client.get('/playlist/info/{}'.format(track_id))
+
+        self.assert404(res)
+

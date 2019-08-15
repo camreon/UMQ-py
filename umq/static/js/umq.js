@@ -1,15 +1,17 @@
 $(function() {
 
     var Track = Backbone.Model.extend({
-//        parse: function(attrs) {
-//            attrs.id = (attrs._id === undefined) ? null : attrs.id;
-//            return attrs;
-//        },
+        parse: function(attrs, options) {
+            // adding a url returns a list of tracks in case it's a playlist
+            // for now just grab the first and usually only track
+            return attrs[0] ? attrs[0] : attrs;
+        },
         defaults: function() {
             return {
+                id: null,
                 title: null,
                 artist: null,
-                url: 'n/a',
+                stream_url: null,
                 page_url: null,
                 order: Tracks.nextOrder()
             };
@@ -20,7 +22,6 @@ $(function() {
         model: Track,
         url: '/playlist',
         modelId: function(attrs) {
-            // null id for new models b/c mongodb will create it
             return attrs.id;
         },
         nextOrder: function() {
@@ -112,7 +113,9 @@ $(function() {
         createOnEnter: function(e) {
             if (e.keyCode !== undefined && e.keyCode != 13) return;
             if (!this.input.val()) return;
-            Tracks.create({url: this.input.val()});
+
+            Tracks.create({ page_url: this.input.val() });
+
             this.input.val('');
             $("html, body").animate({ scrollTop: $(document).height() }, 2000);
         },

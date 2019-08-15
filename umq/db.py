@@ -1,5 +1,4 @@
 import logging
-from environs import Env, EnvError
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
@@ -7,17 +6,6 @@ from sqlalchemy.exc import SQLAlchemyError
 logger = logging.getLogger('db')
 logger.addHandler(logging.StreamHandler())
 
-
-# def get_db():
-#     env = Env()
-#     env.read_env()
-#
-#     testing = env.bool('TESTING', False)
-#
-#     if testing:
-#         return testing
-#     else:
-#         return SQLAlchemy()
 
 db = SQLAlchemy()
 

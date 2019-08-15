@@ -19,8 +19,8 @@
 
     <!-- templates -->
     <script type="text/template" id="track-template">
-        <td class="url" title="<%= url %>"><%- page_url || url %></td>
-        <td class="track" title="<%= title + ' - ' + artist %>"><%- title %></td>
+        <td class="url" title="<%= stream_url %>"><%- page_url %></td>
+        <td class="track" title="<%= title + ' by ' + artist + ' (id: ' + id + ')' %>"><%- title %></td>
         <td>
             <a class="delete" role="button" title="Delete"><span class="glyphicon glyphicon-remove"
                                                                  aria-hidden="true"></span></a>

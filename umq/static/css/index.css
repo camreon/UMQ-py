@@ -42,7 +42,7 @@ audio {
     white-space: nowrap;
     cursor: pointer;
 }
-.row-delete {width: 20px;}
+.row-delete { width: 20px; }
 .row-track  { width: 15%; }
 .row-source { width: 50%; }
 .hideChild > * {
@@ -65,8 +65,6 @@ a.delete :hover {
 #message {
     position: fixed;
     margin: -50px auto;
-    left: 25%;
-    right: 0%;
     z-index: 10;
 }
 #message .alert {
