@@ -13,7 +13,7 @@ logger.addHandler(logging.StreamHandler())
 logging.info('YDL streaming %s' % args.url)
 
 ydl_opts = {
-    'format': 'mp4/bestaudio/best',
+    'format': 'mp3/bestaudio/best',
     'outtmpl': '-',  # stream to stdout
     'logger': logger,
     'logtostderr': True,

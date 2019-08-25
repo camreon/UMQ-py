@@ -10,6 +10,9 @@ body {
     background-color: whitesmoke;
     border-color: whitesmoke;
 }
+.add-url-input {
+    margin: 1%;
+}
 .embed-responsive {
     position: initial;
     height: 100%;
@@ -64,7 +67,7 @@ a.delete :hover {
 
 #message {
     position: fixed;
-    margin: -50px auto;
+    margin: 50px auto;
     z-index: 10;
 }
 #message .alert {
@@ -94,8 +97,13 @@ a.delete :hover {
 
 .table-responsive {
     border: 0;
+    margin-top: 40px;
 }
 
 .playing {
     background-color: rgba(153, 189, 107, 0.64);
+}
+
+.loading {
+    background-color: grey;
 }

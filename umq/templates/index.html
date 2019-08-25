@@ -8,7 +8,7 @@
   </div>
 </nav>
 <div class="container body" id="playlistApp">
-  <div class="input-group ">
+  <nav class="add-url-input navbar-fixed-top input-group ">
     <span class="input-group-btn"><button class="btn btn-default" id="addBtn" type="submit">Add URL</button></span>
     <input class="form-control" id="add" required type="url" name="url"
            placeholder="supports most audio/video streaming sites" autofocus/>
@@ -19,10 +19,10 @@
       <ul class="dropdown-menu dropdown-menu-right">
         <li><a href="https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md" target="_blank"
              title="Supported Sites">Supported Sites</a></li>
-        <li><a id="deleteAll" role="button" title="Delete All">Delete All</a></li>
+<!--        <li><a id="deleteAll" role="button" title="Delete All">Delete All</a></li>-->
       </ul>
     </span>
-  </div>
+  </nav>
   <div class="container" id="message">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}

@@ -43,7 +43,7 @@ class StreamService(GenericStreamService):
         self.logger.addHandler(logging.StreamHandler())
 
         self.options = {
-            'format': 'mp4/bestaudio/best',
+            'format': 'mp3/bestaudio/best',
             'logger': self.logger,
             'logtostderr': True,
             'verbose': True,

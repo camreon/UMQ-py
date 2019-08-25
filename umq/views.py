@@ -2,7 +2,7 @@ import random
 import subprocess
 
 from flask import (
-    Blueprint, flash, json, jsonify, request, Response, render_template, stream_with_context
+    Blueprint, flash, jsonify, request, Response, render_template, stream_with_context
 )
 from umq.db import getAllTracks, getTrack, addTrack, deleteTrack, Track
 from umq.log import log
@@ -44,11 +44,16 @@ def stream_track(id):
     """Get track URL based on ID and use youtube-dl to stream it."""
 
     track = getTrack(id)
-    return Response(
-        stream_with_context(ydl_stream(track.stream_url)),
-        mimetype='audio/mp4',
-        headers={'Accept-Ranges': 'bytes'}
-    )
+
+    try:
+        return Response(
+            # TODO: should use track.stream_url for playlists?
+            stream_with_context(ydl_stream(track.page_url)),
+            mimetype='audio/mp3',
+            headers={'Accept-Ranges': 'bytes'}
+        )
+    except Exception as e:
+        log.error(str(e))
 
 
 @bp.route('/playlist/info/<id>')
@@ -82,6 +87,7 @@ def add():
     url = data['page_url']
     info = StreamService().extract_info(url)
 
+    # TODO move to stream service
     if 'entries' in info:
         tracks = info['entries']
     else:
@@ -90,18 +96,24 @@ def add():
     added_tracks = []
 
     for t in tracks:
+        title = t.get('title')
+
+        if title is None or title == '_':
+            title = t.get('alt_title')
+
         new_track = Track(
-            title=t['title'],
-            artist=t.get('artist', ''),
+            title=title,
+            artist=t.get('artist'),
             page_url=url,
             stream_url=t.get('url', url)
-            # TODO 'duration'=t.get('duration') somehow ???
+            # TODO 'duration'=t.get('duration')
+            # TODO get duration somehow to allow scrubbing
         )
 
         new_id = addTrack(new_track)
         added_tracks.append(new_track)
 
-        log.info('ADDED: %s (id: %s)' % (t['title'], new_id))
+        log.info('ADDED: %s (id: %s)' % (title, new_id))
 
     return jsonify([t.to_json() for t in added_tracks])
 

@@ -42,21 +42,32 @@ $(function() {
             'click .track': 'playTrack'
         },
         initialize: function() {
+            this.listenTo(this.model, 'sync change', this.render);
             this.listenTo(this.model, 'change', this.render);
             this.listenTo(this.model, 'destroy', this.remove);
         },
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
+
+            this.$el.removeClass('loading');
+
+            if (this.isLoading()) {
+                this.$el.toggleClass('loading');
+            }
+
             return this;
         },
         clear: function() {
             this.model.destroy();
         },
         playTrack: function () {
-            // TODO listen to when Player plays a track
+            // TODO listen to when Player plays a track (why?)
             $('#playlist tr').removeClass('playing');
             this.$el.toggleClass('playing');
             Player.play(this.model);
+        },
+        isLoading: function() {
+            return !this.model.attributes.title;
         }
     });
 
