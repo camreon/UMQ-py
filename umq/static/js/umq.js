@@ -86,6 +86,7 @@ $(function() {
             this.nowPlaying = track;
             this.$el.attr('paused', false);
             this.$el.attr('src', 'playlist/' + track.id);
+            this.$el[0].play();
         },
         error: function(e) {
             console.log('MediaError code:', e.target.error.code, 'from URL:', e.target.src);

@@ -11,7 +11,8 @@ body {
     border-color: whitesmoke;
 }
 .add-url-input {
-    margin: 1%;
+    padding: 1%;
+    background-color: whitesmoke;
 }
 .embed-responsive {
     position: initial;
@@ -45,9 +46,17 @@ audio {
     white-space: nowrap;
     cursor: pointer;
 }
-.row-delete { width: 20px; }
-.row-track  { width: 15%; }
-.row-source { width: 50%; }
+
+td.track {
+    height: 57px;
+}
+.track-artist {
+    font-weight: bold;
+}
+
+.row-delete { width: 3%; }
+.row-track  {}
+.row-source {}
 .hideChild > * {
     display: none;
 }

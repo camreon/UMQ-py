@@ -19,11 +19,15 @@
 
     <!-- templates -->
     <script type="text/template" id="track-template">
-        <td class="track" title="<%= title + ' by ' + artist + ' (id: ' + id + ')' %>"><%- title %></td>
+        <td class="track">
+            <div class="track-title" title="<%= title %>"><%- title %></div>
+            <div class="track-artist" title="<%= artist %>"> <%- artist %></div>
+        </td>
         <td class="url" title="<%= stream_url %>"><%- page_url %></td>
         <td>
-            <a class="delete" role="button" title="Delete"><span class="glyphicon glyphicon-remove"
-                                                                 aria-hidden="true"></span></a>
+            <a class="delete" role="button" title="Delete <%= id %>">
+                <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            </a>
         </td>
     </script>
 
