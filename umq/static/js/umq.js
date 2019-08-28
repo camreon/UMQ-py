@@ -13,7 +13,8 @@ $(function() {
                 artist: null,
                 stream_url: null,
                 page_url: null,
-                order: Tracks.nextOrder()
+                order: Tracks.nextOrder(),
+                playing: false
             };
         }
     });
@@ -49,11 +50,8 @@ $(function() {
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
 
-            this.$el.removeClass('loading');
-
-            if (this.isLoading()) {
-                this.$el.toggleClass('loading');
-            }
+            this.$el.toggleClass('loading', this.isLoading());
+            this.$el.toggleClass('playing', this.model.attributes.playing);
 
             return this;
         },
@@ -61,9 +59,7 @@ $(function() {
             this.model.destroy();
         },
         playTrack: function () {
-            // TODO listen to when Player plays a track (why?)
             $('#playlist tr').removeClass('playing');
-            this.$el.toggleClass('playing');
             Player.play(this.model);
         },
         isLoading: function() {
@@ -79,17 +75,23 @@ $(function() {
             'error': 'error'
         },
         playNext: function() {
+            this.nowPlaying.set('playing', false);
+
             nextTrack = Tracks.next(this.nowPlaying);
             this.play(nextTrack);
         },
         play: function(track) {
             this.nowPlaying = track;
+            this.nowPlaying.set('playing', true);
+
             this.$el.attr('paused', false);
             this.$el.attr('src', 'playlist/' + track.id);
+
             this.$el[0].play();
         },
         error: function(e) {
             console.log('MediaError code:', e.target.error.code, 'from URL:', e.target.src);
+
             $('#message').empty()
                 .append($("<div class='alert alert-danger alert-dismissible'></div>")
                     .append($("<button class='close' type='button' data-dismiss='alert' aria-label='Close'></button>")

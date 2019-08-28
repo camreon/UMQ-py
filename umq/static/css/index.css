@@ -50,9 +50,10 @@ audio {
 td.track {
     height: 57px;
 }
-.track-artist {
+.track-title {
     font-weight: bold;
 }
+.track-artist {}
 
 .row-delete { width: 3%; }
 .row-track  {}
@@ -109,10 +110,10 @@ a.delete :hover {
     margin-top: 40px;
 }
 
-.playing {
-    background-color: rgba(153, 189, 107, 0.64);
-}
-
 .loading {
     background-color: grey;
+}
+
+.playing {
+    background-color: rgba(153, 189, 107, 0.64);
 }

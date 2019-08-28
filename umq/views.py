@@ -87,8 +87,8 @@ def add():
     url = data['page_url']
     info = StreamService().extract_info(url)
 
-    # TODO move to stream service
-    if 'entries' in info:
+    # TODO move to StreamService
+    if info and 'entries' in info:
         tracks = info['entries']
     else:
         tracks = [info]
