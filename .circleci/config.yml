@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: tiangolo/uwsgi-nginx-flask:python3.7
+    steps:
+      - checkout
+
+      - restore_cache:
+          key: deps-{{ .Branch }}-{{ checksum "requirements.txt" }}
+
+      - run:
+          name: Install requirements
+          command: |
+            pip install -r requirements.txt --upgrade
+
+      - save_cache:
+          key: deps-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          paths:
+            - ".venv"
+            - "/usr/local/bin"
+            - "/usr/local/lib/python3.7/site-packages"
+
+      - run:
+          name: Run tests
+          command: |
+            mkdir test-reports
+            pytest --junitxml=test-reports/junit.xml
+
+      - store_test_results:
+          path: test-reports
+
+      - store_artifacts:
+          path: test-reports
