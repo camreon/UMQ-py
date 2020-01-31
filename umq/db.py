@@ -1,10 +1,7 @@
-import logging
-
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 
-logger = logging.getLogger('db')
-logger.addHandler(logging.StreamHandler())
+from umq.log import log
 
 
 db = SQLAlchemy()
@@ -44,7 +41,7 @@ def addTrack(track):
         db.session.commit()
         return track.id
     except SQLAlchemyError as e:
-        logging.error("Error adding track -- %s" % str(e))
+        log.error("Error adding track -- %s" % str(e))
 
 
 def deleteTrack(track):
@@ -52,7 +49,7 @@ def deleteTrack(track):
         db.session.delete(track)
         db.session.commit()
     except SQLAlchemyError as e:
-        logging.error("Error deleting track -- %s" % str(e))
+        log.error("Error deleting track -- %s" % str(e))
 
 
 def getTrack(id):

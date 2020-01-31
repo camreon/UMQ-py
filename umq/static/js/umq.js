@@ -90,13 +90,13 @@ $(function() {
             this.$el[0].play();
         },
         error: function(e) {
-            console.log('MediaError code:', e.target.error.code, 'from URL:', e.target.src);
+            console.log('MediaError code:', e.target.error.code, 'from URL:', this.nowPlaying.attributes.page_url);
 
             $('#message').empty()
                 .append($("<div class='alert alert-danger alert-dismissible'></div>")
                     .append($("<button class='close' type='button' data-dismiss='alert' aria-label='Close'></button>")
                         .append($("<span aria-hidden='true'>x</span>")))
-                    .append($('<p>Error playing: '+e.target.src+'</p>')))
+                    .append($('<p>Error playing: '+this.nowPlaying.attributes.page_url+'</p>')))
         },
         pauseOrResume: function() {
             var audio = this.$el[0];

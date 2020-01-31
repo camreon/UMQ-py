@@ -32,8 +32,9 @@ def ydl_stream(url):
     try:
         for line in proc.stdout:
             yield line
-    except IOError as e:
-        log.error(str(e))
+    except Exception as e:
+        log.error('Streaming error: {}'.format(str(e)))
+        proc.kill()
     else:
         log.info('Finished streaming %s' % url)
         proc.kill()
@@ -53,7 +54,7 @@ def stream_track(id):
             headers={'Accept-Ranges': 'bytes'}
         )
     except Exception as e:
-        log.error(str(e))
+        log.error('Response error: {}'.format(str(e)))
 
 
 @bp.route('/playlist/info/<id>')
