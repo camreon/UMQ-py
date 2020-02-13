@@ -1,9 +1,12 @@
 from __future__ import unicode_literals
 
 from flask import Flask
+from flask_injector import FlaskInjector
+from injector import threadlocal
 from umq.config import get_env_config
 from umq.db import db
 from umq.views import bp
+from umq.stream_service import StreamService, MockStreamService
 
 
 def create_app(test_config=None):
@@ -12,34 +15,40 @@ def create_app(test_config=None):
 
     env = get_env_config()
 
-    # some deploy systems set the database url in the environ
-    # db_url = os.environ.get("DATABASE_URL")
-
-    # if db_url is None:
-    #     default to a sqlite database in the instance folder
-        # db_url = "sqlite:///" + os.path.join(app.instance_path, "flaskr.sqlite")
-        # ensure the instance folder exists
-        # os.makedirs(app.instance_path, exist_ok=True)
-
-    if test_config is None:
+    if test_config:
+        # load the test config if passed in
+        app.config.update(test_config)
+    else:
         # load the instance config, if it exists, when not testing
-        # app.config.from_pyfile("config.py", silent=False)
         app.config.from_mapping(
-            SQLALCHEMY_DATABASE_URI=env['sqlalchemy_database_uri'],  # db_url
+            SQLALCHEMY_DATABASE_URI=env['sqlalchemy_database_uri'],
             SQLALCHEMY_TRACK_MODIFICATIONS=False,
             SECRET_KEY=env['secret_key'],
             ECOSYSTEM=env['ecosystem'],
             DEBUG=env['debug']
         )
-    else:
-        # load the test config if passed in
-        app.config.update(test_config)
 
     db.init_app(app)
 
     app.register_blueprint(bp)
 
-    # make "index" point at "/", which is handled by "blog.index"
+    # make "index" point at "/", which is handled by "views.index"
     app.add_url_rule("/", endpoint="index")
 
+    def bind_stream_service(binder):
+        binder.bind(
+            StreamService,
+            to=create_stream_service(test_config),
+            scope=threadlocal
+        )
+
+    FlaskInjector(app=app, modules=[bind_stream_service])
+
     return app
+
+
+def create_stream_service(test_config):
+    if test_config:
+        return MockStreamService()
+    else:
+        return StreamService()

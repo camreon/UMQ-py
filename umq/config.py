@@ -31,8 +31,7 @@ def get_env_config():
             'sqlalchemy_database_uri': get_db_url(),
             'secret_key': env.str('SECRET_KEY'),
             'ecosystem': env.str('ECOSYSTEM', 'dev'),
-            'debug': env.bool("FLASK_DEBUG", False)
-
+            'debug': env.bool('FLASK_DEBUG', False)
         })
     except EnvError as e:
         # TODO:

@@ -4,24 +4,10 @@ from unittest import mock
 from umq.app import create_app
 from umq.db import db, Track
 from werkzeug.exceptions import BadRequest
+from werkzeug.wrappers import ResponseStream
 
 
 class ViewsTest(TestCase):
-
-    mock_extract_info = {
-        'entries': [
-            {
-                'title': 'mock title',
-                'artist': 'mock artist',
-                'url': 'mock url'
-            },
-            {
-                'title': 'mock title 2',
-                'artist': 'mock artist 2',
-                'url': 'mock url 2'
-            }
-        ]
-    }
 
     def create_app(self):
 
@@ -46,20 +32,17 @@ class ViewsTest(TestCase):
 
     def add_track(self, url):
 
-        with mock.patch(
-                'umq.stream_service.StreamService.extract_info',
-                return_value={'title': 'mock title', 'url': url}
-        ):
-            data = json.dumps(dict(page_url=url))
-            res = self.client.post('/playlist', data=data, content_type='application/json')
+        data = json.dumps(dict(page_url=url))
+        res = self.client.post('/playlist', data=data, content_type='application/json')
 
-            self.assert200(res)
-            self.assertIsNotNone(res.json)
+        self.assert200(res)
+        self.assertIsNotNone(res.json)
+        self.assertNotEqual(len(res.json), 0)
 
-            added_track = res.json[0]
-            self.assertEqual(added_track['page_url'], url)
+        added_track = res.json[0]
+        self.assertEqual(added_track['page_url'], url)
 
-            return added_track['id']
+        return added_track['id']
 
     def test_get_track_from_db_session(self):
 
@@ -106,7 +89,25 @@ class ViewsTest(TestCase):
             self.add_track(url)
 
     def test_add_playlist(self):
-        pass
+
+        playlist_url = 'https://alldogs.bandcamp.com/album/7'
+
+        data = json.dumps(dict(page_url=playlist_url))
+        res = self.client.post('/playlist', data=data, content_type='application/json')
+
+        self.assert200(res)
+        self.assertIsNotNone(res.json)
+
+        added_track = res.json[2]
+        self.assertEqual(
+            added_track['page_url'],
+            playlist_url
+        )
+
+        self.assertEqual(
+            added_track['title'],
+            'mock alt title 3'
+        )
 
     def test_add_invalid_tracks(self):
 
@@ -117,7 +118,7 @@ class ViewsTest(TestCase):
         ]
 
         with mock.patch(
-            'umq.stream_service.StreamService.extract_info',
+            'umq.stream_service.MockStreamService.extract_info',
             side_effect=BadRequest()
         ):
             for url in invalid_urls:
@@ -184,3 +185,23 @@ class ViewsTest(TestCase):
 
         self.assert404(res)
 
+    def test_stream_track(self):
+
+        # add track
+        url = 'https://www.youtube.com/watch?v=c5OS0nALlfQ'
+        track_id = self.add_track(url)
+
+        # stream it
+        res = self.client.get('/playlist/{}'.format(track_id))
+
+        self.assert200(res)
+        self.assertEqual(type(res.stream), ResponseStream)
+        self.assertIsNotNone(res.stream)
+
+    def test_stream_missing_track(self):
+
+        track_id = 1000000
+
+        res = self.client.get('/playlist/{}'.format(track_id))
+
+        self.assert404(res)

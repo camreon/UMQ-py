@@ -1,8 +1,7 @@
 import random
-import subprocess
 
 from flask import (
-    Blueprint, flash, jsonify, request, Response, render_template, stream_with_context
+    Blueprint, flash, jsonify, request, Response, render_template
 )
 from umq.db import getAllTracks, getTrack, addTrack, deleteTrack, Track
 from umq.log import log
@@ -20,28 +19,8 @@ def index():
     return render_template('index.html', added=added)
 
 
-# TODO: move to StreamService
-def ydl_stream(url):
-
-    log.info('Started streaming %s' % url)
-
-    proc = subprocess.Popen(['python', 'umq/ydl_stream.py', url],
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            bufsize=0)
-    try:
-        for line in proc.stdout:
-            yield line
-    except Exception as e:
-        log.error('Streaming error: {}'.format(str(e)))
-        proc.kill()
-    else:
-        log.info('Finished streaming %s' % url)
-        proc.kill()
-
-
 @bp.route('/playlist/<id>')
-def stream_track(id):
+def stream_track(id, stream_service: StreamService):
     """Get track URL based on ID and use youtube-dl to stream it."""
 
     track = getTrack(id)
@@ -49,7 +28,7 @@ def stream_track(id):
     try:
         return Response(
             # TODO: should use track.stream_url for playlists?
-            stream_with_context(ydl_stream(track.page_url)),
+            stream_service.stream(track.page_url),
             mimetype='audio/mp3',
             headers={'Accept-Ranges': 'bytes'}
         )
@@ -69,7 +48,7 @@ def get_all_tracks():
 
     tracks = getAllTracks()
 
-    log.debug('%s track(s) found.' % len(tracks))
+    log.info('{} track(s) found.'.format(len(tracks)))
 
     if len(tracks) == 0:
         flash('Looks like you haven\'t added any tracks yet. Try this one:')
@@ -81,14 +60,13 @@ def get_all_tracks():
 
 
 @bp.route('/playlist', methods=['POST'])
-def add():
+def add(stream_service: StreamService):
     """Get track info from a URL and add it to the playlist."""
 
     data = request.get_json()
     url = data['page_url']
-    info = StreamService().extract_info(url)
+    info = stream_service.extract_info(url)
 
-    # TODO move to StreamService
     if info and 'entries' in info:
         tracks = info['entries']
     else:
@@ -107,14 +85,13 @@ def add():
             artist=t.get('artist'),
             page_url=url,
             stream_url=t.get('url', url)
-            # TODO 'duration'=t.get('duration')
-            # TODO get duration somehow to allow scrubbing
+            # TODO allow scrubbing. maybe by getting duration?
         )
 
         new_id = addTrack(new_track)
         added_tracks.append(new_track)
 
-        log.info('ADDED: %s (id: %s)' % (title, new_id))
+        log.info('ADDED: {0} (id: {1})'.format(title, new_id))
 
     return jsonify([t.to_json() for t in added_tracks])
 
@@ -126,8 +103,9 @@ def delete(id=None):
     track = getTrack(id)
     deleteTrack(track)
 
-    log.info('DELETED: {0} - {1}'.format(track.title, track.page_url))
-    flash('DELETED: {0} - {1}'.format(track.title, track.page_url))
+    delete_message = 'DELETED: {0} - {1}'.format(track.title, track.page_url)
+    log.info(delete_message)
+    flash(delete_message)
 
     return jsonify(track.to_json())
 
