@@ -1,3 +1,5 @@
+import json
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -33,6 +35,17 @@ class Track(db.Model):
             artist=self.artist,
             page_url=self.page_url
         )
+
+    @staticmethod
+    def from_dict(track_dict):
+        track = Track(
+            title=track_dict.get('title'),
+            artist=track_dict.get('artist'),
+            page_url=track_dict.get('webpage_url'),
+            stream_url=track_dict.get('url')
+        )
+
+        return track
 
 
 def addTrack(track):

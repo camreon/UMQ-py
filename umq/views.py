@@ -1,10 +1,11 @@
 import random
 
 from flask import (
-    Blueprint, flash, jsonify, request, Response, render_template
+    abort, Blueprint, flash, jsonify, request, render_template
 )
 from umq.db import getAllTracks, getTrack, addTrack, deleteTrack, Track
 from umq.log import log
+from umq.errors import JsonException
 from umq.stream_service import StreamService
 
 
@@ -20,30 +21,23 @@ def index():
 
 
 @bp.route('/playlist/<id>')
-def stream_track(id, stream_service: StreamService):
-    """Get track URL based on ID and use youtube-dl to stream it."""
+def get_track_info(id, stream_service: StreamService):
+    """Update track info from youtube-dl every time db is queried """
 
     track = getTrack(id)
 
     try:
-        return Response(
-            # TODO: should use track.stream_url for playlists?
-            stream_service.stream(track.page_url),
-            mimetype='audio/mp3',
-            headers={'Accept-Ranges': 'bytes'}
-        )
-    except Exception as e:
-        log.error('Response error: {}'.format(str(e)))
+        tracks = stream_service.extract_info(track.page_url)
+    except Exception as error:
+        abort(400, error)
 
+    track = Track.from_dict(tracks[0])
+    track.id = id
 
-@bp.route('/playlist/info/<id>')
-def get_track_info(id):
-
-    track = getTrack(id)
     return jsonify(track.to_json())
 
 
-@bp.route('/playlist', methods=['GET'])
+@bp.route('/playlist/', methods=['GET'])
 def get_all_tracks():
 
     tracks = getAllTracks()
@@ -59,39 +53,32 @@ def get_all_tracks():
     return jsonify(json_tracks)
 
 
-@bp.route('/playlist', methods=['POST'])
+@bp.route('/playlist/', methods=['POST'])
 def add(stream_service: StreamService):
     """Get track info from a URL and add it to the playlist."""
 
     data = request.get_json()
-    url = data['page_url']
-    info = stream_service.extract_info(url)
+    url = data['page_url'].strip()
 
-    if info and 'entries' in info:
-        tracks = info['entries']
-    else:
-        tracks = [info]
+    try:
+        tracks = stream_service.extract_info(url)
+    except Exception as error:
+        abort(400, error)
 
     added_tracks = []
 
     for t in tracks:
-        title = t.get('title')
-
-        if title is None or title == '_':
-            title = t.get('alt_title')
-
         new_track = Track(
-            title=title,
+            title=t.get('title'),
             artist=t.get('artist'),
             page_url=url,
             stream_url=t.get('url', url)
-            # TODO allow scrubbing. maybe by getting duration?
         )
 
         new_id = addTrack(new_track)
         added_tracks.append(new_track)
 
-        log.info('ADDED: {0} (id: {1})'.format(title, new_id))
+        log.info('ADDED: {0} (id: {1})'.format(t.get('title'), new_id))
 
     return jsonify([t.to_json() for t in added_tracks])
 
@@ -103,22 +90,9 @@ def delete(id=None):
     track = getTrack(id)
     deleteTrack(track)
 
-    delete_message = 'DELETED: {0} - {1}'.format(track.title, track.page_url)
-    log.info(delete_message)
-    flash(delete_message)
+    log.info('DELETED: {0} - {1}'.format(track.title, track.page_url))
 
     return jsonify(track.to_json())
-
-
-# TODO
-# @umq.route('/<id>', methods=['PUT'])
-# def update(id):
-#
-#     track = request.get_json()
-#     umq.logger.debug(track)
-#     res = g.playlist.update_one({'_id': track['id']}, track)
-#     umq.logger.debug(res)
-#     return res=
 
 
 def get_example():
@@ -128,3 +102,17 @@ def get_example():
         'https://www.youtube.com/watch?v=CvCLhq8okxc',
         'https://soundcloud.com/serf-crook/homemovie02'
     ])
+
+
+@bp.app_errorhandler(400)
+def custom400(error):
+    log.error(error)
+
+    # want both the youtube-dl error and url here
+
+    json_exception = JsonException(error.description.args[0])
+
+    response = jsonify(json_exception.to_dict())
+    response.status_code = json_exception.status_code
+
+    return response

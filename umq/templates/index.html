@@ -4,7 +4,7 @@
 
 <nav class="navbar navbar-default navbar-fixed-bottom">
   <div class="container" id="player">
-    <audio controls autoplay></audio>
+    <audio controls autoplay controlsList="nodownload"></audio>
   </div>
 </nav>
 <div class="container body" id="playlistApp">
@@ -13,14 +13,10 @@
     <input class="form-control" id="add" required type="url" name="url"
            placeholder="supports most audio/video streaming sites" autofocus/>
     <span class="input-group-btn">
-      <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown"
-              aria-label="Supported Sites" aria-haspopup="true" aria-expanded="false"><span class="caret"></span>
-      </button>
-      <ul class="dropdown-menu dropdown-menu-right">
-        <li><a href="https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md" target="_blank"
-             title="Supported Sites">Supported Sites</a></li>
-<!--        <li><a id="deleteAll" role="button" title="Delete All">Delete All</a></li>-->
-      </ul>
+        <a href="https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md" target="_blank"
+           title="Supported Sites">
+           <button class="btn btn-default" type="button" aria-label="Supported Sites">Supported Sites</button>
+        </a>
     </span>
   </nav>
   <div class="container" id="message">

@@ -1,8 +1,4 @@
-from flask import (abort, jsonify)
-from main import app
-
-
-class InvalidUsage(Exception):
+class JsonException(Exception):
     status_code = 400
 
     def __init__(self, message, status_code=None, payload=None):
@@ -16,17 +12,3 @@ class InvalidUsage(Exception):
         rv = dict(self.payload or ())
         rv['message'] = self.message
         return rv
-
-
-@app.errorhandler(InvalidUsage)
-def handle_invalid_usage(error):
-    response = jsonify(error.to_dict())
-    response.status_code = error.status_code
-    return response
-
-
-@app.errorhandler(400)
-def custom400(error):
-    app.logger.error(error)
-    app.logger.error(error.description)
-    abort(400, error.description)

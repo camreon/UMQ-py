@@ -1,8 +1,25 @@
 $(function() {
 
+    createMessageBox = function(message) {
+        return $('#message')
+            .append($("<div class='alert alert-info alert-dismissible'></div>")
+                .append($("<button class='close' type='button' data-dismiss='alert' aria-label='Close'></button>")
+                    .append($("<span aria-hidden='true'>x</span>")))
+                .append(message))
+
+    }
+
+    createErrorMessageBox = function(message) {
+        return $('#message')
+            .append($("<div class='alert alert-danger alert-dismissible'></div>")
+                .append($("<button class='close' type='button' data-dismiss='alert' aria-label='Close'></button>")
+                    .append($("<span aria-hidden='true'>x</span>")))
+                .append(message))
+    }
+
     var Track = Backbone.Model.extend({
         parse: function(attrs, options) {
-            // adding a url returns a list of tracks in case it's a playlist
+            // TODO: adding a url returns a list of tracks in case it's a playlist
             // for now just grab the first and usually only track
             return attrs[0] ? attrs[0] : attrs;
         },
@@ -14,14 +31,22 @@ $(function() {
                 stream_url: null,
                 page_url: null,
                 order: Tracks.nextOrder(),
-                playing: false
+                playing: false,
+                loading: false
             };
         }
     });
 
+    Track.prototype.toString = function() {
+        attributes = this.get('attributes');
+        if (!attributes) return;
+
+        return attributes.get('title') + '  (' + attributes.get('page_url') + ')';
+    };
+
     var TrackList = Backbone.Collection.extend({
         model: Track,
-        url: '/playlist',
+        url: '/playlist/',
         modelId: function(attrs) {
             return attrs.id;
         },
@@ -50,20 +75,36 @@ $(function() {
         render: function() {
             this.$el.html(this.template(this.model.toJSON()));
 
-            this.$el.toggleClass('loading', this.isLoading());
+            this.$el.toggleClass('loading', this.model.attributes.loading);
             this.$el.toggleClass('playing', this.model.attributes.playing);
 
             return this;
         },
         clear: function() {
-            this.model.destroy();
+            this.model.destroy({
+                success: function(model, response) {
+                    console.log('Deleted track', model);
+
+                    createMessageBox('Deleted track: ' + model.toString());
+                }
+            });
         },
         playTrack: function () {
             $('#playlist tr').removeClass('playing');
-            Player.play(this.model);
-        },
-        isLoading: function() {
-            return !this.model.attributes.title;
+
+            this.model.set('loading', true);
+
+            // get a fresh stream url every time the track is played
+            this.model.fetch({
+                success: function(track) {
+                    Player.play(track);
+                },
+                error: function(model, xhr, options) {
+                    console.log('Error playing: ' + model.attributes.page_url);
+
+                    createErrorMessageBox(xhr.responseJSON.message)
+                }
+            });
         }
     });
 
@@ -78,25 +119,31 @@ $(function() {
             this.nowPlaying.set('playing', false);
 
             nextTrack = Tracks.next(this.nowPlaying);
-            this.play(nextTrack);
+            nextTrack.set('loading', true);
+
+            nextTrack.fetch({
+                success: function(track) {
+                    Player.play(track);
+                },
+                error: this.error
+            });
         },
         play: function(track) {
             this.nowPlaying = track;
+            this.nowPlaying.set('loading', false);
             this.nowPlaying.set('playing', true);
 
             this.$el.attr('paused', false);
-            this.$el.attr('src', 'playlist/' + track.id);
+            this.$el.attr('src', track.attributes.stream_url);
 
             this.$el[0].play();
         },
-        error: function(e) {
-            console.log('MediaError code:', e.target.error.code, 'from URL:', this.nowPlaying.attributes.page_url);
+        error: function (error, etc) {
+            errorMessage = 'Error playing: ' + this.nowPlaying.attributes.page_url
 
-            $('#message').empty()
-                .append($("<div class='alert alert-danger alert-dismissible'></div>")
-                    .append($("<button class='close' type='button' data-dismiss='alert' aria-label='Close'></button>")
-                        .append($("<span aria-hidden='true'>x</span>")))
-                    .append($('<p>Error playing: '+this.nowPlaying.attributes.page_url+'</p>')))
+            console.log(errorMessage);
+
+            createErrorMessageBox(errorMessage);
         },
         pauseOrResume: function() {
             var audio = this.$el[0];
@@ -113,7 +160,8 @@ $(function() {
         events: {
             'keypress #add': 'createOnEnter',
             'click #addBtn': 'createOnEnter',
-            'click #deleteAll': 'clearAll'
+            'click #deleteAll': 'clearAll',
+            'error': 'error'
         },
         initialize: function() {
             this.input = this.$('#add');
@@ -128,15 +176,25 @@ $(function() {
             if (e.keyCode !== undefined && e.keyCode != 13) return;
             if (!this.input.val()) return;
 
-            Tracks.create({ page_url: this.input.val() });
+            Tracks.create({ page_url: this.input.val() }, {
+                wait: true,
+                error: this.error,
+                success: function() {
+                    $("html, body").animate({ scrollTop: $(document).height() }, 2000);
+                }
+            });
 
             this.input.val('');
-            $("html, body").animate({ scrollTop: $(document).height() }, 2000);
         },
         clearAll: function() {
             _.invoke(Tracks.models, 'destroy');
             return false;
-        }
+        },
+        error: function(model, xhr, options) {
+            console.log('Error adding url:', xhr);
+
+            createErrorMessageBox(xhr.responseJSON.message)
+        },
     });
 
     var App = new AppView;
