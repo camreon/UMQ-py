@@ -60,7 +60,7 @@ class StreamService(GenericStreamService):
         """Returns list of track dicts from youtube-dl"""
 
         options = {
-            'format': 'bestaudio',
+            'format': 'm4a/bestaudio',  # safari prefers m4a
             'logtostderr': True,
             'youtube_include_dash_manifest': False
             # fixes videos with unsupported adaptive stream type formats
@@ -74,9 +74,6 @@ class StreamService(GenericStreamService):
                 info = ydl.extract_info(url, download=False)
             except youtube_dl.utils.YoutubeDLError as e:
                 raise
-
-        # if not info:
-        #     raise 400
 
         if 'entries' in info:
             tracks = info['entries']

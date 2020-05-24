@@ -108,7 +108,7 @@ def get_example():
 def custom400(error):
     log.error(error)
 
-    # want both the youtube-dl error and url here
+    #TODO: want both the youtube-dl error and url here
 
     json_exception = JsonException(error.description.args[0])
 

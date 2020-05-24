@@ -138,7 +138,7 @@ $(function() {
 
             this.$el[0].play();
         },
-        error: function (error, etc) {
+        error: function (error) {
             errorMessage = 'Error playing: ' + this.nowPlaying.attributes.page_url
 
             console.log(errorMessage);
