@@ -65,7 +65,7 @@ td.track {
     display: none;
 }
 
-a.delete {
+a.deleteConfirmation {
     -webkit-transition: color 0.2s false;
     -webkit-transition-delay: ease-in;
     -moz-transition: color 0.2s false ease-in;
@@ -74,7 +74,7 @@ a.delete {
     display: none;
     color: rgba(185, 3, 3, 0.63);
 }
-a.delete :hover {
+a.deleteConfirmation :hover {
     color: rgb(86, 2, 2);
 }
 
@@ -99,12 +99,17 @@ a.delete :hover {
 .close:hover {
     opacity: 0.7;
 }
+.confirmation {
+    margin-right: 20px;
+    margin-top: 10px;
+    width: 50px;
+}
 
 #player {
     height: 10px;
 }
 
-#playlist tr:hover .delete {
+#playlist tr:hover .deleteConfirmation {
     display: block;
 }
 

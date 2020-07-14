@@ -35,10 +35,21 @@
         </td>
         <td class="url" title="<%= stream_url %>"><%- page_url %></td>
         <td>
-            <a class="delete" role="button" title="Delete <%= id %>">
+            <a class="deleteConfirmation" role="button" title="Delete <%= id %>">
                 <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
             </a>
         </td>
+    </script>
+
+    <script type="text/template" id="confirmation-modal-template">
+        <div class='alert alert-warning alert-dismissible'>
+            <button class='close' type='button' data-dismiss='alert' aria-label='Close'>
+                <span class="glyphicon glyphicon-remove" aria-hidden='true'></span>
+            </button>
+            <p><%- text %></p>
+            <button class='confirmation confirm' type='button' aria-label='Yes'>Yes</button>
+            <button class='confirmation' type='button' aria-label='No' data-dismiss='alert'>No</button>
+        </div>
     </script>
 
 </body>

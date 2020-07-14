@@ -1,6 +1,6 @@
 **UMQ (Universal Media Queuer)** is a music streaming web app that can create a playlist from multiple sources (youtube, bandcamp, soundcloud, etc.)
 
-**Demo:** http://umq.herokuapp.com/
+**Demo:** http://www.bigplaylist.club/
 
 #### Local Setup
 
@@ -18,6 +18,6 @@ heroku
 
 ## TODO
 
-- tests
-- production config
-- CI
+- multiple playlists
+- analytics, especially for errors
+- loading states

@@ -38,10 +38,10 @@ $(function() {
     });
 
     Track.prototype.toString = function() {
-        attributes = this.get('attributes');
+        attributes = this.attributes;
         if (!attributes) return;
 
-        return attributes.get('title') + '  (' + attributes.get('page_url') + ')';
+        return attributes.title + ' (' + attributes.page_url + ')';
     };
 
     var TrackList = Backbone.Collection.extend({
@@ -63,7 +63,8 @@ $(function() {
         tagName: 'tr',
         template: _.template($('#track-template').html()),
         events: {
-            'click .delete': 'clear',
+            'click .deleteConfirmation': 'deleteConfirmationMessage',
+            'click .delete': 'delete',
             'click .url': 'playTrack',
             'click .track': 'playTrack'
         },
@@ -80,14 +81,20 @@ $(function() {
 
             return this;
         },
-        clear: function() {
+        delete: function() {
             this.model.destroy({
                 success: function(model, response) {
-                    console.log('Deleted track', model);
-
-                    createMessageBox('Deleted track: ' + model.toString());
+                    console.log('Deleted', model);
+                    createMessageBox('Deleted: ' + model.toString());
                 }
             });
+        },
+        deleteConfirmationMessage: function() {
+            var modal = new ConfirmationModalView({
+                text: 'Are you sure you want to delete ' + this.model.toString() + '?'
+            }).render();
+
+            this.listenToOnce(modal, 'confirm', this.delete);
         },
         playTrack: function () {
             $('#playlist tr').removeClass('playing');
@@ -160,7 +167,7 @@ $(function() {
         events: {
             'keypress #add': 'createOnEnter',
             'click #addBtn': 'createOnEnter',
-            'click #deleteAll': 'clearAll',
+            'click #deleteAll': 'deleteAll',
             'error': 'error'
         },
         initialize: function() {
@@ -186,7 +193,7 @@ $(function() {
 
             this.input.val('');
         },
-        clearAll: function() {
+        deleteAll: function() {
             _.invoke(Tracks.models, 'destroy');
             return false;
         },
@@ -199,11 +206,36 @@ $(function() {
 
     var App = new AppView;
 
+    var ConfirmationModalView = Backbone.View.extend({
+        el: $('#message'),
+        template: _.template($('#confirmation-modal-template').html()),
+        events: {
+            'click .confirm': 'confirm',
+        },
+        initialize: function (options) {
+            this.options = options;
+        },
+        render: function() {
+            this.$el.html(this.template(this.options));
+            return this;
+        },
+        confirm: function() {
+            this.trigger('confirm');
+            this.remove();
+        },
+        remove: function() {
+            // override default `remove` method to avoid deleting the `#message` container
+            this.$el.empty();
+            this.stopListening();
+            return this;
+        }
+    });
 
-    $(document).keyup(function (e) {
+    $(document).keydown(function (e) {
         if (e.which === 27) // esc
             $('#message').empty();
         if (e.which === 0 || e.which === 32) { // space
+            e.preventDefault();
             Player.pauseOrResume();
         }
     });
