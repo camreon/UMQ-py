@@ -33,7 +33,7 @@ def get_track_info(id, track_id, stream_service: StreamService):
         abort(400, error)
 
     track = Track.from_dict(tracks[0])
-    track.id = id
+    track.id = track_id
 
     return jsonify(track.to_json())
 

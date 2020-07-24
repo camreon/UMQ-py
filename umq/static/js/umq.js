@@ -66,7 +66,14 @@ $(function() {
           if (!this.length) return 1;
           return this.last().get('order') + 1;
         },
-        comparator: 'order'
+        comparator: 'order',
+        next: function(model) {
+            return this.at((this.indexOf(model) + 1) % _.size(this));
+        },
+        prev: function(model) {
+            var index = this.indexOf(model) - 1;
+            return this.at(index > -1 ? index : _.size(this) - 1);
+        }
     });
 
     var Tracks = new TrackList;
@@ -193,7 +200,6 @@ $(function() {
         events: {
             'keypress #add': 'createOnEnter',
             'click #addBtn': 'createOnEnter',
-            'click #addPlaylist': 'newPlaylist',
             'click #deleteAll': 'deleteAll',
             'error': 'error'
         },
@@ -222,11 +228,6 @@ $(function() {
             });
 
             this.input.val('');
-        },
-        newPlaylist: function() {
-            var playlist_id = new TrackList();
-            
-            console.log('new playlist ' + playlist_id);
         },
         deleteAll: function() {
             _.invoke(Tracks.models, 'destroy');
