@@ -125,3 +125,11 @@ a.deleteConfirmation :hover {
 .playing {
     background-color: rgba(153, 189, 107, 0.64);
 }
+
+button a {
+    color: black;
+}
+button a:hover {
+    color: black;
+    text-decoration: none;
+}

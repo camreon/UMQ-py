@@ -18,6 +18,6 @@ heroku
 
 ## TODO
 
-- multiple playlists
+- next/prev track controls
 - analytics, especially for errors
 - loading states

@@ -2,7 +2,7 @@ import json
 from flask_testing import TestCase
 from unittest import mock
 from umq.app import create_app
-from umq.db import db, Track
+from umq.db import db, Track, Playlist
 
 
 class ViewsTest(TestCase):
@@ -48,7 +48,8 @@ class ViewsTest(TestCase):
             title='test_title',
             artist='test_artist',
             page_url='test_page_url',
-            stream_url='test_stream_url'
+            stream_url='test_stream_url',
+            playlist_id=1
         )
         db.session.add(track)
         db.session.commit()
@@ -156,7 +157,7 @@ class ViewsTest(TestCase):
         track_id = self.add_track(url)
 
         # confirm it's there
-        res = self.client.get('/playlist/{}'.format(track_id))
+        res = self.client.get('/playlist/1/{}'.format(track_id))
 
         self.assertIsNotNone(res.json)
         self.assertEqual(res.json['page_url'], url)
@@ -164,7 +165,7 @@ class ViewsTest(TestCase):
     def test_get_missing_track(self):
         track_id = 1000000
 
-        res = self.client.get('/playlist/{}'.format(track_id))
+        res = self.client.get('/playlist/1/{}'.format(track_id))
 
         self.assert404(res)
 
@@ -175,18 +176,18 @@ class ViewsTest(TestCase):
         track_id = self.add_track(url)
 
         # confirm it's there
-        res = self.client.get('/playlist/{}'.format(track_id))
+        res = self.client.get('/playlist/1/{}'.format(track_id))
 
         self.assertIsNotNone(res.json)
         self.assertEqual(res.json['page_url'], url)
 
         # delete it
-        res = self.client.delete('/playlist/{}'.format(track_id))
+        res = self.client.delete('/playlist/1/{}'.format(track_id))
 
         self.assert200(res)
         self.assertEqual(res.json['page_url'], url)
 
         # confirm it was deleted
-        res = self.client.get('/playlist/{}'.format(track_id))
+        res = self.client.get('/playlist/1/{}'.format(track_id))
 
         self.assert404(res)

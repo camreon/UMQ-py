@@ -13,10 +13,17 @@
     <input class="form-control" id="add" required type="url" name="url"
            placeholder="supports most audio/video streaming sites" autofocus/>
     <span class="input-group-btn">
+      <button class="btn btn-default" type="button" aria-label="Supported Sites">
         <a href="https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md" target="_blank"
            title="Supported Sites">
-           <button class="btn btn-default" type="button" aria-label="Supported Sites">Supported Sites</button>
+           Supported Sites
         </a>
+      </button>
+      <button class="btn btn-default" type="button" aria-label="New Playlist" id="addPlaylist">
+        <a href="/newplaylist" title="New Playlist">
+          <span class="glyphicon glyphicon-plus" aria-hidden='true'></span>
+        </a>
+      </button>
     </span>
   </nav>
   <div class="container" id="message">

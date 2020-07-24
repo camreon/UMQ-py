@@ -1,9 +1,9 @@
 import random
 
 from flask import (
-    abort, Blueprint, flash, jsonify, request, render_template
+    abort, Blueprint, flash, jsonify, request, render_template, redirect
 )
-from umq.db import getAllTracks, getTrack, addTrack, deleteTrack, Track
+from umq.db import Track, Playlist
 from umq.log import log
 from umq.errors import JsonException
 from umq.stream_service import StreamService
@@ -13,18 +13,19 @@ bp = Blueprint("index", __name__)
 
 
 @bp.route('/')
-def index():
+@bp.route('/<id>')
+def index(id=1):
     """Render tracklist."""
 
     added = request.args.get('added', None)
     return render_template('index.html', added=added)
 
 
-@bp.route('/playlist/<id>')
-def get_track_info(id, stream_service: StreamService):
+@bp.route('/playlist/<id>/<track_id>')
+def get_track_info(id, track_id, stream_service: StreamService):
     """Update track info from youtube-dl every time db is queried """
 
-    track = getTrack(id)
+    track = Track.get(track_id)
 
     try:
         tracks = stream_service.extract_info(track.page_url)
@@ -38,13 +39,16 @@ def get_track_info(id, stream_service: StreamService):
 
 
 @bp.route('/playlist/', methods=['GET'])
-def get_all_tracks():
+@bp.route('/playlist/<id>', methods=['GET'])
+def get_playlist_tracks(id=1):
 
-    tracks = getAllTracks()
+    tracks = Playlist.getTracks(id)
 
     log.info('{} track(s) found.'.format(len(tracks)))
 
     if len(tracks) == 0:
+        Playlist.add()
+
         flash('Looks like you haven\'t added any tracks yet. Try this one:')
         flash(get_example())
 
@@ -53,8 +57,17 @@ def get_all_tracks():
     return jsonify(json_tracks)
 
 
+@bp.route('/newplaylist/')
+def add_playlist():
+
+    new_id = Playlist.query.count() + 1
+
+    return redirect('/{}'.format(new_id))
+
+
 @bp.route('/playlist/', methods=['POST'])
-def add(stream_service: StreamService):
+@bp.route('/playlist/<id>', methods=['POST'])
+def add(stream_service: StreamService, id=1):
     """Get track info from a URL and add it to the playlist."""
 
     data = request.get_json()
@@ -72,10 +85,11 @@ def add(stream_service: StreamService):
             title=t.get('title'),
             artist=t.get('artist'),
             page_url=url,
-            stream_url=t.get('url', url)
+            stream_url=t.get('url', url),
+            playlist_id=id
         )
 
-        new_id = addTrack(new_track)
+        new_id = Track.add(new_track)
         added_tracks.append(new_track)
 
         log.info('ADDED: {0} (id: {1})'.format(t.get('title'), new_id))
@@ -83,12 +97,12 @@ def add(stream_service: StreamService):
     return jsonify([t.to_json() for t in added_tracks])
 
 
-@bp.route('/playlist/<id>', methods=['DELETE'])
-def delete(id=None):
+@bp.route('/playlist/<id>/<track_id>', methods=['DELETE'])
+def delete(id=None, track_id=None):
     """Delete a track by ID."""
 
-    track = getTrack(id)
-    deleteTrack(track)
+    track = Track.get(track_id)
+    Track.delete(track)
 
     log.info('DELETED: {0} - {1}'.format(track.title, track.page_url))
 

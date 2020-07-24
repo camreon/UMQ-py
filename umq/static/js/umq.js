@@ -45,8 +45,20 @@ $(function() {
     };
 
     var TrackList = Backbone.Collection.extend({
+        initialize: function(models, options) {
+            options = options || {id: 1};
+            this.id = options.id;
+        },
         model: Track,
-        url: '/playlist/',
+        url: function() {
+            return '/playlist/' + this.id;
+        },
+        sync: function(method, model, options) {
+            options = options || {id: 1};
+            if (options.id) this.id = options.id;
+
+            return Backbone.Collection.prototype.sync.call(this, method, model, options);
+        },
         modelId: function(attrs) {
             return attrs.id;
         },
@@ -86,6 +98,11 @@ $(function() {
                 success: function(model, response) {
                     console.log('Deleted', model);
                     createMessageBox('Deleted: ' + model.toString());
+                },
+                error: function(model, xhr, options) {
+                    console.log('Error deleting: ' + model.attributes.page_url);
+
+                    createErrorMessageBox(xhr.responseJSON.message)
                 }
             });
         },
@@ -162,18 +179,31 @@ $(function() {
 
     var Player = new PlayerView;
 
+    var Router = Backbone.Router.extend({
+        routes: {
+            '(:id)' : 'loadPlaylist'
+        },
+        loadPlaylist: function(id) {
+            Tracks.fetch({id: id});
+        }
+    });
+
     var AppView = Backbone.View.extend({
         el: $('#playlistApp'),
         events: {
             'keypress #add': 'createOnEnter',
             'click #addBtn': 'createOnEnter',
+            'click #addPlaylist': 'newPlaylist',
             'click #deleteAll': 'deleteAll',
             'error': 'error'
         },
         initialize: function() {
             this.input = this.$('#add');
             this.listenTo(Tracks, 'add', this.addTrack);
-            Tracks.fetch();
+
+            this.router = new Router();
+
+            Backbone.history.start({pushState: true});
         },
         addTrack: function(track) {
             var view = new TrackView({model: track});
@@ -192,6 +222,11 @@ $(function() {
             });
 
             this.input.val('');
+        },
+        newPlaylist: function() {
+            var playlist_id = new TrackList();
+            
+            console.log('new playlist ' + playlist_id);
         },
         deleteAll: function() {
             _.invoke(Tracks.models, 'destroy');
