@@ -5,18 +5,21 @@
 <nav class="navbar navbar-default navbar-fixed-bottom">
   <div class="container" id="player">
     <audio controls autoplay controlsList="nodownload"></audio>
+    <div class="controls">
+      <button class="glyphicon glyphicon-step-backward" id="playPrev" aria-hidden="true" title="Play Previous"></button>
+      <button class="glyphicon glyphicon-step-forward" id="playNext" aria-hidden="true" title="Play Next"></button>
+    </div>
   </div>
 </nav>
 <div class="container body" id="playlistApp">
   <nav class="add-url-input navbar-fixed-top input-group ">
-    <span class="input-group-btn"><button class="btn btn-default" id="addBtn" type="submit">Add URL</button></span>
+    <span class="input-group-btn"><button class="btn btn-default" id="addBtn" type="submit">Add</button></span>
     <input class="form-control" id="add" required type="url" name="url"
-           placeholder="supports most audio/video streaming sites" autofocus/>
+           placeholder="audio/video streaming site URL (i.e. youtube, bandcamp, soundcloud)" />
     <span class="input-group-btn">
       <button class="btn btn-default" type="button" aria-label="Supported Sites">
         <a href="https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md" target="_blank"
-           title="Supported Sites">
-           Supported Sites
+           title="Supported Sites" class="glyphicon glyphicon-th-list" aria-hidden="true">
         </a>
       </button>
       <button class="btn btn-default" type="button" aria-label="New Playlist" id="addPlaylist">

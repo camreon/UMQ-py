@@ -20,9 +20,15 @@ body {
 }
 
 audio {
-    width: 100%;
+    width: 69%;
     height: 40px;
     border: solid 4px lightsteelblue;
+}
+
+@media (min-width: 1200px) {
+    audio {
+        width: 92%;
+    }
 }
 
 .input-group {
@@ -106,7 +112,17 @@ a.deleteConfirmation :hover {
 }
 
 #player {
-    height: 10px;
+    height: 40px;
+}
+
+.controls {
+    display: inline;
+}
+
+#playPrev, #playNext {
+    height: 40px;
+    width: 40px;
+    top: -13px;
 }
 
 #playlist tr:hover .deleteConfirmation {

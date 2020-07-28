@@ -27,7 +27,7 @@ $(function() {
             return {
                 id: null,
                 title: null,
-                artist: null,
+                artist: '',
                 stream_url: null,
                 page_url: null,
                 order: Tracks.nextOrder(),
@@ -140,11 +140,13 @@ $(function() {
     });
 
     var PlayerView =  Backbone.View.extend({
-        el: 'audio',
+        el: $('#player'),
         nowPlaying: null,
         events: {
             'ended': 'playNext',
-            'error': 'error'
+            'error': 'error',
+            'click #playNext': 'playNext',
+            'click #playPrev': 'playPrev'
         },
         playNext: function() {
             this.nowPlaying.set('playing', false);
@@ -159,15 +161,48 @@ $(function() {
                 error: this.error
             });
         },
+        playPrev: function() {
+            this.nowPlaying.set('playing', false);
+
+            nextTrack = Tracks.prev(this.nowPlaying);
+            nextTrack.set('loading', true);
+
+            nextTrack.fetch({
+                success: function(track) {
+                    Player.play(track);
+                },
+                error: this.error
+            });
+        },
         play: function(track) {
             this.nowPlaying = track;
             this.nowPlaying.set('loading', false);
             this.nowPlaying.set('playing', true);
 
-            this.$el.attr('paused', false);
-            this.$el.attr('src', track.attributes.stream_url);
+            var audio = this.$el.children('audio');
 
-            this.$el[0].play();
+            audio.attr('paused', false);
+            audio.attr('src', track.attributes.stream_url);
+
+            audio[0].play();
+
+            // Media Session API for mobile controls
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: track.attributes.title,
+                    artist: track.attributes.artist,
+                    album: track.attributes.page_url,
+                    // TODO: artwork: []
+                });
+
+                navigator.mediaSession.setActionHandler('previoustrack', function() {
+                  Player.playPrev();
+                });
+
+                navigator.mediaSession.setActionHandler('nexttrack', function() {
+                  Player.playNext();
+                });
+            }
         },
         error: function (error) {
             errorMessage = 'Error playing: ' + this.nowPlaying.attributes.page_url
@@ -177,7 +212,7 @@ $(function() {
             createErrorMessageBox(errorMessage);
         },
         pauseOrResume: function() {
-            var audio = this.$el[0];
+            var audio = this.$el.children('audio');
             if (audio.src !== '' && audio.paused)
                 audio.play();
             else audio.pause();
