@@ -62,6 +62,7 @@ class StreamService(GenericStreamService):
         options = {
             'format': 'm4a/bestaudio',  # safari prefers m4a
             'logtostderr': True,
+            'nocheckcertificate': True,
             'youtube_include_dash_manifest': False
             # fixes videos with unsupported adaptive stream type formats
             # https://github.com/ytdl-org/youtube-dl/issues/6099
