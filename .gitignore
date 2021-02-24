@@ -61,7 +61,6 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
-
 .idea
 
 #bower
@@ -72,5 +71,6 @@ app/static/bower_components/
 logs/
 
 .DS_Store
+.vscode
 
 node_modules
