@@ -1,23 +1,36 @@
 import React, { Component } from 'react';
+import { TrackProps } from '../Playlist/Track';
+import './Player.css';
 
-export default class Player extends Component {
+export default class Player extends Component<TrackProps> {
   
+  public static defaultProps = {
+    id: null,
+    title: '',
+    artist: '',
+    page_url: '',
+    stream_url: '',
+  };
+
   render() {
     return (
-      <header className="App-header">
-        <nav className="navbar navbar-default navbar-fixed-bottom">
-          <div className="container" id="player">
-                
-            <audio controls autoPlay controlsList="nodownload"></audio>
-            
-            <div className="controls">
-              <button className="glyphicon glyphicon-step-backward" id="playPrev" aria-hidden="true" title="Play Previous"></button>
-              <button className="glyphicon glyphicon-step-forward" id="playNext" aria-hidden="true" title="Play Next"></button>
-            </div>
-            
+      <nav className="navbar navbar-default navbar-fixed-bottom">
+        <div className="container" id="player">
+              
+          <audio 
+            autoPlay 
+            controls 
+            controlsList="nodownload"
+            src={this.props.stream_url} 
+          ></audio>
+          
+          <div className="controls">
+            <button className="fa fa-step-backward" id="playPrev" aria-hidden="true" title="Play Previous"></button>
+            <button className="fa fa-step-forward" id="playNext" aria-hidden="true" title="Play Next"></button>
           </div>
-        </nav>
-      </header>
+          
+        </div>
+      </nav>
     )
   }
 }

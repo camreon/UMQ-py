@@ -1,0 +1,10 @@
+#playlist, .table {
+    table-layout: fixed;
+}
+
+.row-delete { width: 3%; }
+
+.table-responsive {
+    border: 0;
+    margin-top: 40px;
+}

@@ -1,51 +1,53 @@
-import logo from './logo.svg';
 import React, { Component } from 'react';
 import Menu from './Components/Menu';
-import Playlist from './Components/Playlist';
 import Player from './Components/Player';
+import Playlist from './Components/Playlist';
 import { TrackProps } from './Components/Playlist/Track';
-import { getPlaylist } from './Api';
+import { getTrack } from './Api';
 import './App.css';
 
 type State = {
   playlistId: string,
-  playlist: TrackProps[],
-  loading: boolean
+  currentlyPlayingTrack: TrackProps | null
 };
 
+const DEFAULT_PLAYLIST_ID = '1';
+
 export default class App extends Component<{}, State> {  
+  
   state: State = {
-    playlistId: '',
-    playlist: [],
-    loading: false
+    playlistId: DEFAULT_PLAYLIST_ID,
+    currentlyPlayingTrack: null
   };
 
   componentDidMount() {
     this.setState({
-      playlistId: window.location.pathname.substring(1),
-      loading: true
-    }, () => {
-      getPlaylist(this.state.playlistId)
-        .then((res) => {
-          this.setState({ 
-            playlist: res,
-            loading: false
-          })
-        })
+      playlistId: window.location.pathname.substring(1) || DEFAULT_PLAYLIST_ID,
     });
   };
 
+  addTrack(e: any) {
+    console.log(e);
+  };
+
+  playTrack = (track: TrackProps): void => {
+    getTrack(this.state.playlistId, track.id)
+      .then((res) => {
+        this.setState({ currentlyPlayingTrack: res })
+      });
+  }
+
   render() {
     return (
-      <div className="App">
-        <div className="container body" id="playlistApp">
-          <Menu />
-          <Playlist playlist={this.state.playlist} />
-          {this.state.loading && (
-            <img src={logo} className="App-logo" alt="logo" />
-          )}
-        </div>
-        <Player />
+      <div className="container body">
+        <Menu 
+          onSubmit={this.addTrack} 
+        />
+        <Playlist 
+          playlistId={this.state.playlistId} 
+          playTrack={this.playTrack}
+        />
+        <Player {...this.state.currentlyPlayingTrack} />
       </div>
     );
   }

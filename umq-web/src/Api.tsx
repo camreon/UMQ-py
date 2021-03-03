@@ -21,3 +21,11 @@ export async function getPlaylist(id: string): Promise<TrackProps[]> {
 
   return response.json();
 }
+
+export async function getTrack(id: string, track_id: number): Promise<TrackProps> {
+  const response = await fetch(`${url}/${id}/${track_id}`);
+
+  await assertOk(response);
+
+  return response.json();
+}

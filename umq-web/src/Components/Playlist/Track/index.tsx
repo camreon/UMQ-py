@@ -9,11 +9,15 @@ export type TrackProps = {
   stream_url: string,
 }
 
-export class Track extends Component<TrackProps> {
+type Props = {
+  handleOnClick: () => void
+}
+
+export class Track extends Component<TrackProps & Props> {
 
   render() {
     return (
-      <tr>
+      <tr onClick={() => this.props.handleOnClick()}>
         <td className="track">
           <div className="track-title" title={this.props.title}>{this.props.title}</div>
           <div className="track-artist" title={this.props.artist}> {this.props.artist}</div>
@@ -21,7 +25,7 @@ export class Track extends Component<TrackProps> {
         <td className="url" title={this.props.stream_url}>{this.props.page_url}</td>
         <td>
           <button className="deleteConfirmation" title={"Delete " + this.props.id}>
-            <span className="glyphicon glyphicon-remove" aria-hidden="true"></span>
+            <span className="fa fa-remove" aria-hidden="true"></span>
           </button>
         </td>
       </tr>

@@ -1,0 +1,16 @@
+.add-url-input {
+    padding: 1%;
+    background-color: whitesmoke;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+button a {
+    color: black;
+}
+button a:hover {
+    color: black;
+    text-decoration: none;
+}

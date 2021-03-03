@@ -1,11 +1,38 @@
 import React, { Component } from 'react';
 import { Track, TrackProps } from './Track';
+import { getPlaylist } from './../../Api';
+import './Playlist.css';
 
 type Props = {
-  playlist: TrackProps[]
+  playlistId: string,
+  playTrack: (track: TrackProps) => void
 }
 
-export default class Playlist extends Component<Props> {
+type State = {
+  playlist: TrackProps[],
+  loading: boolean
+};
+
+export default class Playlist extends Component<Props, State> {
+
+  state: State = {
+    playlist: [],
+    loading: false
+  };
+
+  componentDidMount() {
+    this.setState({
+      loading: true
+    }, () => {
+      getPlaylist(this.props.playlistId)
+        .then((res) => {
+          this.setState({ 
+            playlist: res,
+            loading: false
+          })
+        })
+    });
+  };
 
   render() {
     return (
@@ -19,11 +46,21 @@ export default class Playlist extends Component<Props> {
           </tr>
           </thead>
           <tbody id="playlist">
-            {this.props.playlist.map((track) =>
-              <Track key={track.id} {...track} />
+            {this.state.playlist.map((track) =>
+              <Track 
+                key={track.id} 
+                handleOnClick={() => this.props.playTrack(track)}
+                {...track} 
+              />
             )}
           </tbody>
         </table>
+        
+        {this.state.loading && (
+          <div className="loading-icon-container">
+            <span className="fa fa-spinner fa-spin" />
+          </div>
+        )}
       </div>
     )
   }

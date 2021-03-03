@@ -1,0 +1,36 @@
+.navbar {
+    height: 50px;
+    background-color: whitesmoke;
+    border-color: whitesmoke;
+}
+
+.embed-responsive {
+    position: initial;
+    height: 100%;
+}
+
+audio {
+    width: 69%;
+    height: 40px;
+    border: solid 4px lightsteelblue;
+}
+
+@media (min-width: 1200px) {
+    audio {
+        width: 92%;
+    }
+}
+
+#player {
+    height: 40px;
+}
+
+.controls {
+    display: inline;
+}
+
+#playPrev, #playNext {
+    height: 40px;
+    width: 40px;
+    top: -13px;
+}
