@@ -2,9 +2,13 @@
     table-layout: fixed;
 }
 
-.row-delete { width: 3%; }
+.row-index {
+    width: 3%;
+}
+.row-delete { 
+    width: 5%; 
+}
 
 .table-responsive {
     border: 0;
-    margin-top: 40px;
 }

@@ -31,7 +31,7 @@ td.track {
     background-color: rgba(153, 189, 107, 0.64);
 }
 
-a.deleteConfirmation {
+.deleteConfirmation {
     -webkit-transition: color 0.2s false;
     -webkit-transition-delay: ease-in;
     transition-delay: ease-in;
@@ -41,14 +41,6 @@ a.deleteConfirmation {
     display: none;
     color: rgba(185, 3, 3, 0.63);
 }
-a.deleteConfirmation :hover {
-    color: rgb(86, 2, 2);
-}
-
-button a {
-    color: black;
-}
-button a:hover {
-    color: black;
-    text-decoration: none;
+.deleteConfirmation :hover {
+    color: rgba(185, 3, 3, 0.63);
 }

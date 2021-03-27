@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './Menu.css';
 
 type Props = {
-  onSubmit: (e: any) => void
+  onSubmit: (page_url: string) => void
 }
 
 type State = {
@@ -15,39 +15,47 @@ export default class Menu extends Component<Props, State> {
     input: ''
   };
 
+  supportedSitesUrl: string = "https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md";
+
   handleOnChange = (e: any) => this.setState({ input: e.target.value });
 
-  handleOnSubmit = (e: any) => this.props.onSubmit(e.target.value);
+  handleOnSubmit = (e: any) => {
+    e.preventDefault();
+    this.props.onSubmit(this.state.input);
+    this.setState({input: ''});
+  };
 
   render() {
     return (
       <form onSubmit={this.handleOnSubmit}>
-        <nav className="add-url-input navbar-fixed-top input-group ">
-          <span className="input-group-btn">
-            <button className="btn btn-default" id="addBtn" type="submit">Add</button>
-          </span>
-          
-          <input className="form-control" id="add" required type="url" name="url"
-                placeholder="audio/video streaming site URL (i.e. youtube, bandcamp, soundcloud)"
-                value={this.state.input}
-                onChange={this.handleOnChange} />
-        
-        <span className="input-group-btn">  
-          <button className="btn btn-default" type="button" aria-label="Supported Sites">
-            <a href="https://github.com/rg3/youtube-dl/blob/master/docs/supportedsites.md" 
-               target="_blank" rel="noreferrer" title="Supported Sites" 
-               className="fa fa-th-list" aria-hidden="true">
+        <nav className="btn-toolbar mb-3 d-flex navbar navbar-fixed-top" role="toolbar">
+          <div className="input-group mr-2 flex-grow-1" role="group">
+            <div className="input-group-prepend">
+              <button className="btn btn-outline-secondary" id="addBtn" type="submit">
+                Add
+              </button>
+            </div>
+            <input className="form-control" id="add" required type="url" name="url"
+              placeholder="a media streaming site URL (Youtube, Bandcamp, Soundcloud, etc.)"
+              value={this.state.input}
+              onChange={this.handleOnChange} 
+            />
+          </div>
+
+          <div className="btn-group" role="group">
+            <a href={this.supportedSitesUrl} className="btn btn-outline-secondary" role="button" 
+              target="_blank" rel="noreferrer" title="Supported Sites"
+            >
+              Supported Sites
             </a>
-          </button>
-          <button className="btn btn-default" type="button" 
-                  aria-label="New Playlist" id="addPlaylist">
-            <a href="/newplaylist" title="New Playlist">
-              <span className="fa fa-plus" aria-hidden='true'></span>
+            <a href="/newplaylist" className="btn btn-outline-secondary" role="button" 
+              id="addPlaylist" title="New Playlist"
+            >
+              New Playlist
             </a>
-          </button>
-        </span>
-      </nav>
-    </form>
-    )
+          </div>
+        </nav>
+      </form>
+    );
   }
 }

@@ -14,7 +14,7 @@ export default class Player extends Component<TrackProps> {
 
   render() {
     return (
-      <nav className="navbar navbar-default navbar-fixed-bottom">
+      <nav className="navbar navbar-default fixed-bottom">
         <div className="container" id="player">
               
           <audio 
@@ -25,8 +25,8 @@ export default class Player extends Component<TrackProps> {
           ></audio>
           
           <div className="controls">
-            <button className="fa fa-step-backward" id="playPrev" aria-hidden="true" title="Play Previous"></button>
-            <button className="fa fa-step-forward" id="playNext" aria-hidden="true" title="Play Next"></button>
+            <button className="btn fa fa-step-backward" id="playPrev" aria-hidden="true" title="Play Previous"></button>
+            <button className="btn fa fa-step-forward" id="playNext" aria-hidden="true" title="Play Next"></button>
           </div>
           
         </div>
