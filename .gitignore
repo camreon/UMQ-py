@@ -72,5 +72,6 @@ logs/
 
 .DS_Store
 .vscode
+.eslintcache
 
 node_modules
