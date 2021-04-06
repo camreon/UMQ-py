@@ -6,7 +6,7 @@ export type TrackProps = {
   title: string,
   artist?: string,
   page_url: string,
-  stream_url: string,
+  stream_url: string
 }
 
 type Props = {

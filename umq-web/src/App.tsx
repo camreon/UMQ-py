@@ -10,7 +10,8 @@ const DEFAULT_PLAYLIST_ID = '1';
 
 type State = {
   playlistId: string,
-  nowPlaying: TrackProps | null,
+  streamUrl: string,
+  currentIndex: number,
   tracks: TrackProps[],
   loading: boolean
 };
@@ -19,7 +20,8 @@ export default class App extends Component<{}, State> {
   
   state: State = {
     playlistId: DEFAULT_PLAYLIST_ID,
-    nowPlaying: null,
+    streamUrl: '',
+    currentIndex: -1,
     tracks: [],
     loading: false
   };
@@ -53,14 +55,16 @@ export default class App extends Component<{}, State> {
     });
   };
 
-  playTrack = (track: TrackProps): void => {
+  playTrack = (track_index: number): void => {
     this.setState({
       loading: true,
-      nowPlaying: track
+      currentIndex: track_index
     }, () => {
+      let track = this.state.tracks[track_index];
+
       getTrack(this.state.playlistId, track.id)
         .then((res) => {
-          this.setState({nowPlaying: res})
+          this.setState({streamUrl: res.stream_url})
         })
         .catch((e) => {
           // TODO: this doesn;t work
@@ -81,22 +85,40 @@ export default class App extends Component<{}, State> {
       });
   };
 
+  nextTrack = () => {
+    const nextIndex = (this.state.currentIndex + 1) % this.state.tracks.length;
+    this.playTrack(nextIndex);
+  };
+
+  prevTrack = () => {
+    const prevIndex = (this.state.currentIndex - 1) > -1 
+      ? this.state.currentIndex - 1
+      : this.state.tracks.length - 1;
+
+    this.playTrack(prevIndex);
+  };
+
   render() {
-    const nowPlayingId: number = this.state.nowPlaying ? +this.state.nowPlaying.id : -1;
+    const currentTrack = this.state.tracks[this.state.currentIndex];
 
     return (
       <div className="container body">
         <Menu 
-          onSubmit={this.addTrack} 
+          onSubmit={this.addTrack}
         />
         <Playlist 
           loading={this.state.loading}
-          nowPlayingId={nowPlayingId}
+          currentIndex={this.state.currentIndex}
           tracks={this.state.tracks} 
           playTrack={this.playTrack}
           deleteTrack={this.deleteTrack}
         />
-        <Player {...this.state.nowPlaying} />
+        <Player 
+          handleOnNext={() => this.nextTrack()}
+          handleOnPrev={() => this.prevTrack()}
+          streamUrl={this.state.streamUrl}
+          {...currentTrack} 
+        />
       </div>
     );
   }

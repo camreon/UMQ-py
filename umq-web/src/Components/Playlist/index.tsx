@@ -4,9 +4,9 @@ import './Playlist.css';
 
 type Props = {
   loading: boolean,
-  nowPlayingId: number | undefined, 
+  currentIndex: number, 
   tracks: TrackProps[],
-  playTrack: (track: TrackProps) => void,
+  playTrack: (track_index: number) => void,
   deleteTrack: (track_id: number) => void
 }
 
@@ -35,9 +35,9 @@ export default class Playlist extends Component<Props> {
               <Track 
                 key={track.id}
                 isLoading={this.props.loading}
-                isPlaying={this.props.nowPlayingId === track.id}
+                isPlaying={this.props.currentIndex === index}
                 number={index + 1}
-                handleOnClick={() => this.props.playTrack(track)}
+                handleOnClick={() => this.props.playTrack(index)}
                 handleOnDelete={() => this.props.deleteTrack(track.id)}
                 {...track} 
               />
