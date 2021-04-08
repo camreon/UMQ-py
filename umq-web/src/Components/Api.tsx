@@ -49,3 +49,10 @@ export async function deleteTrack(playlist_id: string, track_id: number): Promis
   await assertOk(response);
   return response.json();
 }
+
+export async function getNextPlaylistId(): Promise<string> {
+  const response = await fetch(`/newplaylist/`);
+  
+  await assertOk(response);
+  return response.json();
+}

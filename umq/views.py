@@ -47,10 +47,7 @@ def get_playlist_tracks(id=1):
     log.info('{} track(s) found.'.format(len(tracks)))
 
     if len(tracks) == 0:
-        Playlist.add()
-
         flash('Looks like you haven\'t added any tracks yet. Try this one:')
-        flash(get_example())
 
     json_tracks = [t.to_json() for t in tracks]
 
@@ -58,11 +55,9 @@ def get_playlist_tracks(id=1):
 
 
 @bp.route('/newplaylist/')
-def add_playlist():
-
-    new_id = Playlist.query.count() + 1
-
-    return redirect('/{}'.format(new_id))
+def get_next_playlist_id():
+    """Return next available playlist id"""
+    return jsonify(Playlist.query.count() + 1)
 
 
 @bp.route('/playlist/', methods=['POST'])
@@ -78,6 +73,10 @@ def add(stream_service: StreamService, id=1):
     except Exception as error:
         abort(400, error)
 
+    if len(Playlist.getTracks(id)) == 0:
+        Playlist.add()
+        log.info('ADDED playlist {0}'.format(id))
+
     added_tracks = []
 
     for t in tracks:
@@ -90,9 +89,10 @@ def add(stream_service: StreamService, id=1):
         )
 
         new_id = Track.add(new_track)
+        new_track.id = new_id
         added_tracks.append(new_track)
 
-        log.info('ADDED: {0} (id: {1})'.format(t.get('title'), new_id))
+        log.info('ADDED track: {0} (id: {1})'.format(new_track.title, new_track.id))
 
     return jsonify([t.to_json() for t in added_tracks])
 
@@ -107,15 +107,6 @@ def delete(id=None, track_id=None):
     log.info('DELETED: {0} - {1}'.format(track.title, track.page_url))
 
     return jsonify(track.to_json())
-
-
-def get_example():
-
-    return random.choice([
-        'https://gloccamorradied.bandcamp.com/track/professional-confessional-2',
-        'https://www.youtube.com/watch?v=CvCLhq8okxc',
-        'https://soundcloud.com/serf-crook/homemovie02'
-    ])
 
 
 @bp.app_errorhandler(400)

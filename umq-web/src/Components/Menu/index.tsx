@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import './Menu.css';
 
 type Props = {
+  nextPlaylistId: string,
   onSubmit: (page_url: string) => void
 }
 
@@ -26,6 +27,8 @@ export default class Menu extends Component<Props, State> {
   };
 
   render() {
+    const nextPlaylistUrl = `/${this.props.nextPlaylistId}`;
+
     return (
       <form onSubmit={this.handleOnSubmit}>
         <nav className="btn-toolbar mb-3 d-flex navbar navbar-fixed-top" role="toolbar">
@@ -48,7 +51,7 @@ export default class Menu extends Component<Props, State> {
             >
               Supported Sites
             </a>
-            <a href="/newplaylist" className="btn btn-outline-secondary" role="button" 
+            <a href={nextPlaylistUrl} className="btn btn-outline-secondary" role="button" 
               id="addPlaylist" title="New Playlist"
             >
               New Playlist

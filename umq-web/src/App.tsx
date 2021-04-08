@@ -1,25 +1,32 @@
 import React, { Component } from 'react';
+import { withRouter, RouteComponentProps } from "react-router";
 import Menu from './Components/Menu';
 import Player from './Components/Player';
 import Playlist from './Components/Playlist';
 import { TrackProps } from './Components/Playlist/Track';
-import { getPlaylist, getTrack, addTrack, deleteTrack } from './Components/Api';
+import { getPlaylist, getTrack, addTrack, deleteTrack, getNextPlaylistId } from './Components/Api';
 import './App.css';
 
 const DEFAULT_PLAYLIST_ID = '1';
 
+type RouteParams = {
+  id: string; 
+};
+
 type State = {
   playlistId: string,
+  nextPlaylistId: string,
   streamUrl: string,
   currentIndex: number,
   tracks: TrackProps[],
   loading: boolean
 };
 
-export default class App extends Component<{}, State> {  
+class App extends Component<RouteComponentProps<RouteParams>, State> {  
   
   state: State = {
     playlistId: DEFAULT_PLAYLIST_ID,
+    nextPlaylistId: '',
     streamUrl: '',
     currentIndex: -1,
     tracks: [],
@@ -29,7 +36,7 @@ export default class App extends Component<{}, State> {
   componentDidMount() {
     this.setState({
       loading: true,
-      playlistId: window.location.pathname.substring(1) || DEFAULT_PLAYLIST_ID
+      playlistId: this.props.match.params.id || DEFAULT_PLAYLIST_ID
     }, () => {
       getPlaylist(this.state.playlistId)
         .then((res) => {
@@ -37,7 +44,12 @@ export default class App extends Component<{}, State> {
             tracks: res,
             loading: false
           })
-        })
+        });
+
+      getNextPlaylistId()
+        .then((res) => {
+          this.setState({nextPlaylistId: res})
+        });
     });
   };
 
@@ -104,6 +116,7 @@ export default class App extends Component<{}, State> {
     return (
       <div className="container body">
         <Menu 
+          nextPlaylistId={this.state.nextPlaylistId}
           onSubmit={this.addTrack}
         />
         <Playlist 
@@ -123,3 +136,5 @@ export default class App extends Component<{}, State> {
     );
   }
 }
+
+export default withRouter(App);
