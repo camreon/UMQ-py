@@ -12,15 +12,6 @@ from umq.stream_service import StreamService
 bp = Blueprint("index", __name__)
 
 
-@bp.route('/')
-@bp.route('/<id>')
-def index(id=1):
-    """Render tracklist."""
-
-    added = request.args.get('added', None)
-    return render_template('index.html', added=added)
-
-
 @bp.route('/playlist/<id>/<track_id>')
 def get_track_info(id, track_id, stream_service: StreamService):
     """Update track info from youtube-dl every time db is queried """
