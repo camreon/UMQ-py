@@ -1,1 +1,1 @@
-web: uwsgi --socket 0.0.0.0:5000 --protocol=http --ini uwsgi.ini
+web: bin/start-nginx-debug uwsgi uwsgi.ini
