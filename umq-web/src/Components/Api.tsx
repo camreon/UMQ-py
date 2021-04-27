@@ -1,6 +1,6 @@
 import { TrackProps } from './Playlist/Track';
 
-const url = '/playlist';
+const url = '/api';
 
 type Response = {
   ok: any,
@@ -51,7 +51,7 @@ export async function deleteTrack(playlist_id: string, track_id: number): Promis
 }
 
 export async function getNextPlaylistId(): Promise<string> {
-  const response = await fetch(`/newplaylist/`);
+  const response = await fetch(`${url}/newplaylist/`);
   
   await assertOk(response);
   return response.json();

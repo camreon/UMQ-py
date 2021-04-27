@@ -40,10 +40,10 @@ class App extends Component<RouteComponentProps<RouteParams>, State> {
     }, () => {
       getPlaylist(this.state.playlistId)
         .then((res) => {
-          this.setState({ 
-            tracks: res,
-            loading: false
-          })
+          this.setState({tracks: res})
+        })
+        .finally(() => {
+          this.setState({loading: false})
         });
 
       getNextPlaylistId()

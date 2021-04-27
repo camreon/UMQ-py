@@ -1,7 +1,0 @@
-#!/usr/bin/env sh
-ColorOff=$'\e[0m'
-Cyan=$'\e[1;36m'
-Green=$'\e[1;32m'
-
-trap "trap - SIGTERM && kill -- -$$" SIGINT SIGTERM EXIT
-sed -e "s/^/[${Cyan}py${ColorOff}] /" & HOST_ADDR="$(ipconfig getifaddr en0)" docker-compose up

@@ -9,10 +9,10 @@ from umq.errors import JsonException
 from umq.stream_service import StreamService
 
 
-bp = Blueprint("index", __name__)
+bp = Blueprint("index", __name__, url_prefix='/api')
 
 
-@bp.route('/playlist/<id>/<track_id>')
+@bp.route('/<int:id>/<int:track_id>')
 def get_track_info(id, track_id, stream_service: StreamService):
     """Update track info from youtube-dl every time db is queried """
 
@@ -29,8 +29,8 @@ def get_track_info(id, track_id, stream_service: StreamService):
     return jsonify(track.to_json())
 
 
-@bp.route('/playlist/', methods=['GET'])
-@bp.route('/playlist/<id>', methods=['GET'])
+@bp.route('/', methods=['GET'])
+@bp.route('/<int:id>', methods=['GET'])
 def get_playlist_tracks(id=1):
 
     tracks = Playlist.getTracks(id)
@@ -51,8 +51,8 @@ def get_next_playlist_id():
     return jsonify(Playlist.query.count() + 1)
 
 
-@bp.route('/playlist/', methods=['POST'])
-@bp.route('/playlist/<id>', methods=['POST'])
+@bp.route('/', methods=['POST'])
+@bp.route('/<int:id>', methods=['POST'])
 def add(stream_service: StreamService, id=1):
     """Get track info from a URL and add it to the playlist."""
 
@@ -64,6 +64,7 @@ def add(stream_service: StreamService, id=1):
     except Exception as error:
         abort(400, error)
 
+    # create playlist when the first track is added
     if len(Playlist.getTracks(id)) == 0:
         Playlist.add()
         log.info('ADDED playlist {0}'.format(id))
@@ -88,7 +89,7 @@ def add(stream_service: StreamService, id=1):
     return jsonify([t.to_json() for t in added_tracks])
 
 
-@bp.route('/playlist/<id>/<track_id>', methods=['DELETE'])
+@bp.route('/<int:id>/<int:track_id>', methods=['DELETE'])
 def delete(id=None, track_id=None):
     """Delete a track by ID."""
 

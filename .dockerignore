@@ -1,7 +1,9 @@
 .git
 .idea
 target
-node_modules
 project
 dist
 etc
+bin
+config
+umq-web

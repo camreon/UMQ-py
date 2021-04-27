@@ -7,6 +7,10 @@ from umq.db import db, Track, Playlist
 
 class ViewsTest(TestCase):
 
+    API_URL = '/api/'
+    PLAYLIST_ID = '1'
+    NEW_PLAYLIST_URL = 'newplaylist/'
+
     def create_app(self):
 
         # pass in test configuration
@@ -31,7 +35,7 @@ class ViewsTest(TestCase):
     def add_track(self, url):
 
         data = json.dumps(dict(page_url=url))
-        res = self.client.post('/playlist/', data=data, content_type='application/json')
+        res = self.client.post(self.API_URL, data=data, content_type='application/json')
 
         self.assert200(res)
         self.assertIsNotNone(res.json)
@@ -42,39 +46,36 @@ class ViewsTest(TestCase):
 
         return added_track['id']
 
-    def test_get_track_from_db_session(self):
+    def test_add_track_to_db_session(self):
 
+        TEST_PAGE_URL = 'test_page_url'
         track = Track(
             title='test_title',
             artist='test_artist',
-            page_url='test_page_url',
+            page_url=TEST_PAGE_URL,
             stream_url='test_stream_url',
             playlist_id=1
         )
         db.session.add(track)
         db.session.commit()
 
-        # this works
         self.assertIn(track, db.session)
 
-        res = self.client.get("/")
+        res = self.client.get(self.API_URL)
 
         self.assert200(res)
-        # this raises an AssertionError
-        self.assertIn(track, db.session)
+        self.assertIsNotNone(res.json)
+        self.assertNotEqual(len(res.json), 0)
+
+        added_track = res.json[0]
+        self.assertEqual(added_track['page_url'], TEST_PAGE_URL)
 
     def test_empty_db(self):
 
-        res = self.client.get('/playlist/')
+        res = self.client.get(self.API_URL)
 
         self.assert200(res)
         self.assertEqual(res.json, [])
-
-    def test_index_status_code(self):
-
-        res = self.client.get('/')
-
-        self.assert200(res)
 
     def test_add_tracks(self):
 
@@ -87,12 +88,16 @@ class ViewsTest(TestCase):
         for url in urls:
             self.add_track(url)
 
+        res = self.client.get(self.API_URL)
+
+        self.assertIsNotNone(res.json)
+
     def test_add_playlist(self):
 
         playlist_url = 'https://alldogs.bandcamp.com/album/7'
 
         data = json.dumps(dict(page_url=playlist_url))
-        res = self.client.post('/playlist/', data=data, content_type='application/json')
+        res = self.client.post(self.API_URL, data=data, content_type='application/json')
 
         self.assert200(res)
         self.assertIsNotNone(res.json)
@@ -123,7 +128,7 @@ class ViewsTest(TestCase):
         ):
             for url in invalid_urls:
                 data = json.dumps(dict(page_url=url))
-                res = self.client.post('/playlist/', data=data, content_type='application/json')
+                res = self.client.post(self.API_URL, data=data, content_type='application/json')
 
                 self.assert400(res)
                 self.assertEqual('test error message', res.json['message'])
@@ -140,7 +145,7 @@ class ViewsTest(TestCase):
             self.add_track(url)
 
         # confirm they're there
-        res = self.client.get('/playlist/')
+        res = self.client.get(self.API_URL)
 
         self.assertIsNotNone(res.json)
 
@@ -157,15 +162,16 @@ class ViewsTest(TestCase):
         track_id = self.add_track(url)
 
         # confirm it's there
-        res = self.client.get('/playlist/1/{}'.format(track_id))
+        res = self.client.get('{}{}/{}'.format(self.API_URL, self.PLAYLIST_ID, track_id))
 
         self.assertIsNotNone(res.json)
         self.assertEqual(res.json['page_url'], url)
 
     def test_get_missing_track(self):
+        
         track_id = 1000000
 
-        res = self.client.get('/playlist/1/{}'.format(track_id))
+        res = self.client.get('{}{}/{}'.format(self.API_URL, self.PLAYLIST_ID, track_id))
 
         self.assert404(res)
 
@@ -176,18 +182,36 @@ class ViewsTest(TestCase):
         track_id = self.add_track(url)
 
         # confirm it's there
-        res = self.client.get('/playlist/1/{}'.format(track_id))
+        res = self.client.get('{}{}/{}'.format(self.API_URL, self.PLAYLIST_ID, track_id))
 
         self.assertIsNotNone(res.json)
         self.assertEqual(res.json['page_url'], url)
 
         # delete it
-        res = self.client.delete('/playlist/1/{}'.format(track_id))
+        res = self.client.delete('{}{}/{}'.format(self.API_URL, self.PLAYLIST_ID, track_id))
 
         self.assert200(res)
         self.assertEqual(res.json['page_url'], url)
 
         # confirm it was deleted
-        res = self.client.get('/playlist/1/{}'.format(track_id))
+        res = self.client.get('{}{}/{}'.format(self.API_URL, self.PLAYLIST_ID, track_id))
 
         self.assert404(res)
+
+    def test_new_playlist(self):
+        
+        # returns 1 when no playlists exist
+        res = self.client.get('{}{}'.format(self.API_URL, self.NEW_PLAYLIST_URL))
+
+        self.assert200(res)
+        self.assertEqual(res.json, 1 )
+
+        # add track to add a new playlist 
+        url = 'https://www.youtube.com/watch?v=c5OS0nALlfQ'
+        self.add_track(url)
+
+        # returns 2 as the next available playlist 
+        res = self.client.get('{}{}'.format(self.API_URL, self.NEW_PLAYLIST_URL))
+
+        self.assert200(res)
+        self.assertEqual(res.json, 2)

@@ -1,8 +1,8 @@
-[coverage:run]
+[run]
 branch = True
 source =
     umq
 
-[coverage:report]
+[report]
 fail_under = 75
 precision = 2
