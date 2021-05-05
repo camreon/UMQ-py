@@ -14,7 +14,7 @@ Flask-Testing==0.5.0
 gunicorn==19.6.0
 injector==0.18.3
 itsdangerous==0.24
-Jinja2==2.10.1
+Jinja2==2.11.3
 Mako==1.0.4
 MarkupSafe==0.23
 marshmallow==2.19.2
