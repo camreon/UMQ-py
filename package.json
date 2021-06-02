@@ -1,0 +1,23 @@
+{
+  "name": "heroku-cra-flask",
+  "version": "3.0.0",
+  "description": "How to use create-react-app with a custom Flask API on Heroku",
+  "engines": {
+    "node": "10.x"
+  },
+  "scripts": {
+    "build": "cd umq-web/ && yarn && yarn start"
+  },
+  "cacheDirectories": [
+    "node_modules",
+    "umq-web/node_modules"
+  ],
+  "keywords": [
+    "node",
+    "heroku",
+    "create-react-app",
+    "react"
+  ],
+  "license": "MIT",
+  "devDependencies": {}
+}
